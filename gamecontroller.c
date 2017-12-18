@@ -8,6 +8,7 @@ typedef enum OceloPlayer {
 void InitGame();
 void WaitPutStone();
 void StartTurn();
+void ClickBoard();
 int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
 void RenewStatus();
 void ExchangeTurn();
@@ -21,15 +22,8 @@ void InitGame() {
   ocelo[4][4] = STONE_BLACK;
 
   playerTurn = PLAYER_BLACK;
-}
 
-void StartTurn() {
-  OceloStone stone; 
-
-  if(playerTurn == PLAYER_BLACK) stone = STONE_BLACK;
-  if(playerTurn == PLAYER_WHITE) stone = STONE_WHITE;
-
-  CheckAllSquaresToPut(stone);
+  CheckAllSquaresToPut(STONE_BLACK);
 }
 
 void ClickBoard(int x, int y) {
@@ -42,7 +36,7 @@ void ClickBoard(int x, int y) {
   if(playerTurn == PLAYER_BLACK) stone = STONE_BLACK;
   if(playerTurn == PLAYER_WHITE) stone = STONE_WHITE;
 
-  PutStone(x, y, stone);
+  PutStone(xx, yy, stone);
   ExchangeTurn();
   RenewStatus();
 }
