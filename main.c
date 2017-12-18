@@ -1,7 +1,7 @@
 #include<GL/glut.h>
 
 #define WIDTH 640
-#define HEIGHT 480
+#define HEIGHT 640
 
 void Display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
