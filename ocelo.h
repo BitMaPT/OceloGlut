@@ -11,6 +11,7 @@ typedef enum OceloStone {
 }OceloStone;
 
 void PutStone(int x, int y, OceloStone stone);
+void CheckAllSquaresToPut(OceloStone stone);
 
 extern int ocelo[OCELO_HEIGHT][OCELO_WIDTH];
 extern int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
