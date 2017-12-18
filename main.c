@@ -1,16 +1,21 @@
 #include<GL/glut.h>
+#include"graphicocelo.h"
 
 #define WIDTH 640
-#define HEIGHT 480
+#define HEIGHT 640
 
 void Display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
 
+  DrawBoard();
+
   glutSwapBuffers();
 }
 
 void Resize(int w, int h) {
+  glViewport(0, 0, w, h);
+  glLoadIdentity();
   glOrtho(0, WIDTH, HEIGHT, 0, -1.0, 1.0);
 }
 
@@ -36,7 +41,7 @@ void Idle() {
 }
 
 void init() {
-  glClearColor(0, 1, 0, 1);
+  glClearColor(0, 0.7, 0, 1);
 }
 
 int main(int argc, char **argv) {
