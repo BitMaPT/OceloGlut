@@ -1,4 +1,5 @@
 #include<GL/glut.h>
+#include"ocelo.c"
 
 void DrawBoard();
 
@@ -27,6 +28,27 @@ void DrawBoard() {
   glVertex2d(40 + 70 * 6, 40 + 70 * 2);
   glVertex2d(40 + 70 * 6, 40 + 70 * 6);
   glEnd();
+}
 
-  
+void DrawStones() {
+  int x, y;
+
+  for(y = 0; y < OCELO_HEIGHT; y++) {
+    for(x = 0; x < OCELO_WIDTH; x++) {
+      DrawStone(x, y);
+    }
+  }
+}
+
+void DrawStone(int x, int y) {
+  OceloStone stone;
+  int xx, yy;
+
+  stone = ocelo[y][x];
+  if(stone != STONE_NONE) {
+    xx = 40 + 70 * x + 35;
+    yy = 40 + 70 * y + 35;
+
+    
+  }
 }

@@ -1,5 +1,7 @@
 #include<GL/glut.h>
 #include"graphicocelo.h"
+#include"ocelo.h"
+#include"gamecontroller.h"
 
 #define WIDTH 640
 #define HEIGHT 640
@@ -42,6 +44,7 @@ void Idle() {
 
 void init() {
   glClearColor(0, 0.7, 0, 1);
+  InitGame();
 }
 
 int main(int argc, char **argv) {
