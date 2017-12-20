@@ -2,5 +2,6 @@
 #define HEADER_GRAPHICOCELO
 
 void DrawBoard();
+void DrawStones();
 
 #endif

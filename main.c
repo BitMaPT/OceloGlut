@@ -11,6 +11,7 @@ void Display() {
   glMatrixMode(GL_MODELVIEW);
 
   DrawBoard();
+  DrawStones();
 
   glutSwapBuffers();
 }

@@ -1,7 +1,12 @@
 #include<GL/glut.h>
+#include<math.h>
 #include"ocelo.c"
 
+#define CIRCLE_VERTEX 100
+
 void DrawBoard();
+void DrawStones();
+void DrawStone(int x, int y);
 
 void DrawBoard() {
   int i;
@@ -49,6 +54,19 @@ void DrawStone(int x, int y) {
     xx = 40 + 70 * x + 35;
     yy = 40 + 70 * y + 35;
 
-    
+    int i;
+    double cx, cy;
+
+    if(stone == STONE_WHITE) glColor3d(1, 1, 1);
+    if(stone == STONE_BLACK) glColor3d(0, 0, 0);
+
+    glBegin(GL_POLYGON);
+    for(i = 0; i < CIRCLE_VERTEX; i++) {
+      cx = 20 * cos(2 * M_PI * ((double)i / CIRCLE_VERTEX));
+      cy = 20 * sin(2 * M_PI * ((double)i / CIRCLE_VERTEX));
+
+      glVertex2d(cx, cy);
+    }
+    glEnd();
   }
 }
