@@ -16,6 +16,14 @@ void ExchangeTurn();
 OceloPlayer playerTurn = PLAYER_BLACK;
 
 void InitGame() {
+  int x, y;
+
+  for(y = 0; y < OCELO_HEIGHT; y++) {
+    for(x = 0; x < OCELO_WIDTH; x++) {
+      ocelo[y][x] = STONE_NONE;
+    }
+  }
+
   ocelo[3][3] = STONE_BLACK;
   ocelo[3][4] = STONE_WHITE;
   ocelo[4][3] = STONE_WHITE;
