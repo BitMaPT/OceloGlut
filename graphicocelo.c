@@ -1,6 +1,6 @@
 #include<GL/glut.h>
 #include<math.h>
-#include"ocelo.c"
+#include"ocelo.h"
 
 #define CIRCLE_VERTEX 100
 
@@ -62,8 +62,8 @@ void DrawStone(int x, int y) {
 
     glBegin(GL_POLYGON);
     for(i = 0; i < CIRCLE_VERTEX; i++) {
-      cx = 20 * cos(2 * M_PI * ((double)i / CIRCLE_VERTEX));
-      cy = 20 * sin(2 * M_PI * ((double)i / CIRCLE_VERTEX));
+      cx = 20 * cos(2 * M_PI * ((double)i / CIRCLE_VERTEX)) + xx;
+      cy = 20 * sin(2 * M_PI * ((double)i / CIRCLE_VERTEX)) + yy;
 
       glVertex2d(cx, cy);
     }
