@@ -15,6 +15,8 @@ void ExchangeTurn();
 
 OceloPlayer playerTurn = PLAYER_BLACK;
 
+Object *objectList;
+
 void InitGame() {
   int x, y;
 
