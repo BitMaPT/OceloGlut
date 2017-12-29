@@ -1,3 +1,4 @@
+#include<stdlib.h>
 #include"ocelo.h"
 #include"ocelostone.h"
 
@@ -26,25 +27,29 @@ void RenewStatus();
 void ExchangeTurn();
 
 //OceloPlayer playerTurn = PLAYER_BLACK;
-
-Stone oceloStone[OCELO_HEIGHT][OCELO_WIDTH];
+static GameState gameState;
+Stone *oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 Object *objectList;
 
 void InitGame() {
   int x, y;
+  
+  gameState = GAMESTATE_INIT;
 
   for(y = 0; y < OCELO_HEIGHT; y++) {
     for(x = 0; x < OCELO_WIDTH; x++) {
-      ocelo[y][x] = STONE_NONE;
+      oceloBoard[y][x] = NULL;
     }
   }
 
-  ocelo[3][3] = STONE_BLACK;
-  ocelo[3][4] = STONE_WHITE;
-  ocelo[4][3] = STONE_WHITE;
-  ocelo[4][4] = STONE_BLACK;
+  oceloBoard[3][3] = InitOceloStone(3, 3, STONE_BLACK);
+  oceloBoard[3][4] = InitOceloStone(3, 4, STONE_WHITE);
+  oceloBoard[4][3] = InitOceloStone(4, 3, STONE_WHITE);
+  oceloBoard[4][4] = InitOceloStone(4, 4, STONE_BLACK);
 
-  playerTurn = PLAYER_BLACK;
+
+
+  //playerTurn = PLAYER_BLACK;
 
   CheckAllSquaresToPut(STONE_BLACK);
 }
