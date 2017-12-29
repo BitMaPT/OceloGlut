@@ -8,7 +8,6 @@
 #define REVERSE_STATE_TIME 500 //(ms)
 
 typedef enum StoneState {
-  STONE_STATE_INIT,
   STONE_STATE_BLACK,
   STONE_STATE_WHITE,
   STONE_STATE_REVERSE_B2W_FIRST,
@@ -43,11 +42,14 @@ void StoneUpdate(Stone *stone) {
   DrawStone(stone);
 }
 
+Stone* InitOceloStone(int x, int y, OceloStone type) {
+
+}
+
 GLdouble CalcAngle(Stone *stone) {
   switch(stone->state.state) {
     case STONE_STATE_BLACK:
     case STONE_STATE_WHITE:
-    case STONE_STATE_INIT:
       return 0;
     case STONE_STATE_REVERSE_B2W_FIRST:
     case STONE_STATE_REVERSE_W2B_FIRST:
@@ -63,12 +65,6 @@ void StateAutoMaton(Stone *stone) {
   int stateTime;
 
   switch(stone->state.state) {
-    case STONE_STATE_INIT:
-      switch(stone->stone) {
-        case STONE_BLACK: stone->state = InitStateContena(STONE_STATE_BLACK); return;
-        case STONE_WHITE: stone->state = InitStateContena(STONE_STATE_WHITE); return;
-        case STONE_NONE: printf("(%s)Error line:%d\n", __FILE__, __LINE__); exit(1);
-      }
     case STONE_STATE_BLACK:
     case STONE_STATE_WHITE:
       return;
@@ -104,7 +100,6 @@ StoneStateContena InitStateContena(StoneState state) {
   StoneStateContena s = {state, 0, 0, 0};
 
   switch(state) {
-    case STONE_STATE_INIT:
     case STONE_STATE_BLACK:
     case STONE_STATE_WHITE:
       return s;
