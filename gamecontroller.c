@@ -1,4 +1,5 @@
 #include"ocelo.h"
+#include"ocelostone.h"
 
 typedef enum OceloPlayer {
   PLAYER_BLACK,
@@ -24,8 +25,9 @@ int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
 void RenewStatus();
 void ExchangeTurn();
 
-OceloPlayer playerTurn = PLAYER_BLACK;
+//OceloPlayer playerTurn = PLAYER_BLACK;
 
+Stone oceloStone[OCELO_HEIGHT][OCELO_WIDTH];
 Object *objectList;
 
 void InitGame() {
