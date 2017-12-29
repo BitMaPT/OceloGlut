@@ -3,8 +3,7 @@
 
 typedef enum OceloStone {
   STONE_WHITE,
-  STONE_BLACK,
-  STONE_NONE
+  STONE_BLACK
 }OceloStone;
 
 void PutStone(int x, int y, OceloStone stone);
