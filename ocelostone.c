@@ -35,6 +35,8 @@ StoneStateContena InitStateContena(StoneState state);
 void StateAutoMaton(Stone *stone);
 int DrawStone(Stone *stone);
 GLdouble CalcAngle(Stone *stone);
+void StoneUpdate(Stone *stone);
+Stone* InitOceloStone(int x, int y, OceloStone type);
 
 void StoneUpdate(Stone *stone) {
   StateAutoMaton(stone);
