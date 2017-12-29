@@ -43,7 +43,27 @@ void StoneUpdate(Stone *stone) {
 }
 
 Stone* InitOceloStone(int x, int y, OceloStone type) {
+  Stone *stone;
 
+  stone = (Stone*)malloc(sizeof(Stone));
+  if(stone == NULL) return NULL;
+
+  switch(type) {
+    case STONE_BLACK: 
+      stone->stone = STONE_BLACK;
+      stone->state = InitStateContena(STONE_STATE_BLACK);
+      break;
+    case STONE_WHITE:
+      stone->stone = STONE_WHITE;
+      stone->state = InitStateContena(STONE_STATE_WHITE);
+      break;
+    default:
+      printf("(%s)Error line:%d\n", __FILE__, __LINE__);
+      exit(1);
+  }
+
+  stone->pos[0] = x;
+  stone->pos[1] = y;
 }
 
 GLdouble CalcAngle(Stone *stone) {
