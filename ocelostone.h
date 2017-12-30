@@ -34,5 +34,6 @@ typedef struct Stone {
 
 void StoneUpdate(Stone *stone);
 Stone* InitOceloStone(int x, int y, OceloStone type);
+int DrawStone(Stone *stone);
 
 #endif
