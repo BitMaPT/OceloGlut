@@ -158,3 +158,19 @@ int DrawStone(Stone *stone) {
   return 1;
 }
 
+void TiggerOfReverse(Stone *stone) {
+  switch(stone->state.state) {
+    case STONE_STATE_BLACK:
+      stone->state = InitStateContena(STONE_STATE_REVERSE_B2W_FIRST);
+      stone->stone = STONE_WHITE;
+      return;
+    case STONE_STATE_WHITE:
+      stone->state = InitStateContena(STONE_STATE_REVERSE_W2B_FIRST);
+      stone->stone = STONE_BLACK;
+      return;
+    default:
+      printf("(%s)Error line:%d\n", __FILE__, __LINE__);
+      exit(1);
+  }
+}
+
