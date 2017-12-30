@@ -2,8 +2,9 @@
 #define OCELO_HEIGHT 8
 
 typedef enum OceloStone {
-  STONE_WHITE,
-  STONE_BLACK
+  OCELO_STONE_WHITE,
+  OCELO_STONE_BLACK,
+  OCELO_STONE_NONE
 }OceloStone;
 
 void PutStone(int x, int y, OceloStone stone);
@@ -26,8 +27,8 @@ void PutStone(int x, int y, OceloStone stone) {
   int i;
   OceloStone enemy;
 
-  if(stone == STONE_WHITE) enemy = STONE_BLACK;
-  if(stone == STONE_BLACK) enemy = STONE_WHITE;
+  if(stone == OCELO_STONE_WHITE) enemy = OCELO_STONE_BLACK;
+  if(stone == OCELO_STONE_BLACK) enemy = OCELO_STONE_WHITE;
 
   ocelo[y][x] = stone;
 
@@ -102,8 +103,8 @@ int CanPut(int x, int y, OceloStone stone) {
   int i;
   OceloStone enemy;
 
-  if(stone == STONE_WHITE) enemy = STONE_BLACK;
-  if(stone == STONE_BLACK) enemy = STONE_WHITE;
+  if(stone == OCELO_STONE_WHITE) enemy = OCELO_STONE_BLACK;
+  if(stone == OCELO_STONE_BLACK) enemy = OCELO_STONE_WHITE;
 
   if(CanPutRight(x, y, stone, enemy)) return 1;
   if(CanPutLeft(x, y, stone, enemy)) return 1;
@@ -125,7 +126,7 @@ int CanPutRight(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = x + 1; i < OCELO_WIDTH; i++) {
     if(ocelo[y][i] == stone) return 1;
-    if(ocelo[y][i] == STONE_NONE) return 0;
+    if(ocelo[y][i] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -139,7 +140,7 @@ int CanPutLeft(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = x - 1; i >= 0; i--) {
     if(ocelo[y][i] == stone) return 1;
-    if(ocelo[y][i] == STONE_NONE) return 0;
+    if(ocelo[y][i] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -153,7 +154,7 @@ int CanPutUp(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = y - 1; i >= 0; i--) {
     if(ocelo[i][x] == stone) return 1;
-    if(ocelo[i][x] == STONE_NONE) return 0;
+    if(ocelo[i][x] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -167,7 +168,7 @@ int CanPutBelow(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = y + 1; i < OCELO_HEIGHT; i++) {
     if(ocelo[i][x] == stone) return 1;
-    if(ocelo[i][x] == STONE_NONE) return 0;
+    if(ocelo[i][x] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -182,7 +183,7 @@ int CanPutUpRight(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = 1; (x + i < OCELO_WIDTH) && (y - i >= 0); i++) {
     if(ocelo[y - i][x + i] == stone) return 1;
-    if(ocelo[y - i][x + i] == STONE_NONE) return 0;
+    if(ocelo[y - i][x + i] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -197,7 +198,7 @@ int CanPutUpLeft(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = 1; (x - i >= 0) && (y - i >= 0); i++) {
     if(ocelo[y - i][x - i] == stone) return 1;
-    if(ocelo[y - i][x - i] == STONE_NONE) return 0;
+    if(ocelo[y - i][x - i] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -212,7 +213,7 @@ int CanPutBelowRight(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = 1; (x + i < OCELO_WIDTH) && (y + i < OCELO_HEIGHT); i++) {
     if(ocelo[y + i][x + i] == stone) return 1;
-    if(ocelo[y + i][x + i] == STONE_NONE) return 0;
+    if(ocelo[y + i][x + i] == OCELO_STONE_NONE) return 0;
   }
 
   return 0;
@@ -227,7 +228,7 @@ int CanPutBelowLeft(int x, int y, OceloStone stone, OceloStone enemy) {
 
   for(i = 1; (x - i >= 0) && (y + i < OCELO_HEIGHT); i++) {
     if(ocelo[y + i][x - i] == stone) return 1;
-    if(ocelo[y + i][x - i] == STONE_NONE) return 0;
+    if(ocelo[y + i][x - i] == OCELO_STONE_NONE) return 0;
   } 
 
   return 0;
