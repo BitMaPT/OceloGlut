@@ -1,34 +1,12 @@
 #include<stdlib.h>
 #include"ocelo.h"
 #include"ocelostone.h"
-
-typedef enum OceloPlayer {
-  PLAYER_BLACK,
-  PLAYER_WHITE
-}OceloPlayer;
-
-typedef enum GameState {
-  GAMESTATE_INIT,
-  GAMESTATE_BLACK_PLAYER,
-  GAMESTATE_WHITE_PLAYER,
-  GAMESTATE_REVERSE_W2B,
-  GAMESTATE_REVERSE_B2W,
-  GAMESTATE_ENDING,
-  GAMESTATE_CALC_RESULT,
-  GAMESTATE_SHOW_RESULT
-}GameState;
-
-void InitGame();
-void WaitPutStone();
-void StartTurn();
-void ClickBoard();
-int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
-void RenewStatus();
-void ExchangeTurn();
+#include"gamecontroller.h"
 
 //OceloPlayer playerTurn = PLAYER_BLACK;
 static GameState gameState;
 Stone *oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
+int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 Object *objectList;
 
 void InitGame() {
