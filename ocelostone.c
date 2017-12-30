@@ -2,10 +2,14 @@
 #include<stdlib.h>
 #include<GL/glut.h>
 #include<math.h>
-#include"ocelo.h"
 
 #define CIRCLE_VERTEX 100
 #define REVERSE_STATE_TIME 500 //(ms)
+
+typedef enum OceloStoneColor {
+  STONE_WHITE,
+  STONE_BLACK
+}OceloStoneColor;
 
 typedef enum StoneState {
   STONE_STATE_BLACK,
@@ -24,7 +28,7 @@ typedef struct StoneStateContena {
 }StoneStateContena;
 
 typedef struct Stone {
-  OceloStone stone;
+  OceloStoneColor stone;
   StoneStateContena state;
   GLdouble angle;
   GLint pos[2];
@@ -36,7 +40,7 @@ void StateAutoMaton(Stone *stone);
 int DrawStone(Stone *stone);
 GLdouble CalcAngle(Stone *stone);
 void StoneUpdate(Stone *stone);
-Stone* InitOceloStone(int x, int y, OceloStone type);
+Stone* InitOceloStone(int x, int y, OceloStoneColor type);
 
 void StoneUpdate(Stone *stone) {
   StateAutoMaton(stone);
@@ -44,7 +48,7 @@ void StoneUpdate(Stone *stone) {
   DrawStone(stone);
 }
 
-Stone* InitOceloStone(int x, int y, OceloStone type) {
+Stone* InitOceloStone(int x, int y, OceloStoneColor type) {
   Stone *stone;
 
   stone = (Stone*)malloc(sizeof(Stone));
@@ -66,6 +70,8 @@ Stone* InitOceloStone(int x, int y, OceloStone type) {
 
   stone->pos[0] = x;
   stone->pos[1] = y;
+
+  return stone;
 }
 
 GLdouble CalcAngle(Stone *stone) {

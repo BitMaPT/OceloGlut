@@ -4,6 +4,11 @@
 #include<GL/glut.h>
 #include"ocelo.h"
 
+typedef enum OceloStone {
+  STONE_WHITE,
+  STONE_BLACK
+}OceloStone;
+
 typedef enum StoneState {
   STONE_STATE_BLACK,
   STONE_STATE_WHITE,
