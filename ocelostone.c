@@ -7,8 +7,8 @@
 #define REVERSE_STATE_TIME 500 //(ms)
 
 typedef enum OceloStoneColor {
-  STONE_WHITE,
-  STONE_BLACK
+  STONE_COLOR_WHITE,
+  STONE_COLOR_BLACK
 }OceloStoneColor;
 
 typedef enum StoneState {
@@ -55,12 +55,12 @@ Stone* InitOceloStone(int x, int y, OceloStoneColor type) {
   if(stone == NULL) return NULL;
 
   switch(type) {
-    case STONE_BLACK: 
-      stone->stone = STONE_BLACK;
+    case STONE_COLOR_BLACK: 
+      stone->stone = STONE_COLOR_BLACK;
       stone->state = InitStateContena(STONE_STATE_BLACK);
       break;
-    case STONE_WHITE:
-      stone->stone = STONE_WHITE;
+    case STONE_COLOR_WHITE:
+      stone->stone = STONE_COLOR_WHITE;
       stone->state = InitStateContena(STONE_STATE_WHITE);
       break;
     default:
