@@ -1,6 +1,6 @@
 #include<stdlib.h>
 #include"gamecontroller.h"
-#include"ocelo.h"
+#include"oceloboard.h"
 #include"ocelostone.h"
 
 //int ocelo[OCELO_HEIGHT][OCELO_WIDTH];
@@ -17,64 +17,56 @@ void PutStone(int x, int y, OceloStoneColor mine) {
   if(CanPutRight(x, y, mine, enemy)) {
     for(i = x + 1; i < OCELO_WIDTH; i++) {
       if(oceloBoard[y][i]->stone == mine) break;
-      //TODO implement
-      exit(1);
+      TriggerOfReverse(oceloboard[y][i]);
     }
   }
 
   if(CanPutLeft(x, y, stone, enemy)) {
     for(i = x - 1; i >= 0; i--) {
       if(oceloBoard[y][i]->stone == stone) break;
-      //TODO
-      exit(1);
+      TriggerOfReverse(oceloBoard[y][i]);
     }
   }
 
   if(CanPutUp(x, y, stone, enemy)) {
     for(i = y - 1; i >= 0; i--) {
       if(oceloBoard[i][x]->stone == stone) break;
-      //TODO
-      exit(1);
+      TriggerOfReverse(oceloBoard[i][x]);
     }
   }
 
   if(CanPutBelow(x, y, stone, enemy)) {
     for(i = y + 1; i < OCELO_HEIGHT; i++) {
       if(oceloBoard[i][x]->stone == stone) break;
-      //TODO
-      exit(1);
+      TriggerOfReverse(oceloBoard[i][x]);
     }
   }
 
   if(CanPutUpRight(x, y, stone, enemy)) {
     for(i = 1; (x + i < OCELO_WIDTH) && (y - i >= 0); i++) {
       if(oceloBoard[y - i][x + i]->stone == stone) break;
-      //TODO
-      exit(1);
+      TriggerOfReverse(oceloBoard[y - i][x + i]);
     }
   }
 
   if(CanPutUpLeft(x, y, stone, enemy)) {
     for(i = 1; (x - i >= 0) && (y - i >= 0); i++) {
       if(oceloBoard[y - i][x - i]->stone == stone) break;
-      //TODO
-      exit(1);
+      TriggerOfReverse(oceloBoard[y - i][x - i]);
     }
   }
 
   if(CanPutBelowRight(x, y, stone, enemy)) {
     for(i = 1; (x + i < OCELO_WIDTH) && (y + i < OCELO_HEIGHT); i++) {
-      if(ocelo[y + i][x + i]->stone == stone) break;
-      //TODO
-      exit(1);
+      if(oceloBoard[y + i][x + i]->stone == stone) break;
+      TriggerOfReverse(oceloBoard[y + i][x + i]);
     }
   }
 
   if(CanPutBelowLeft(x, y, stone, enemy)) {
     for(i = 1; (x - i >= 0) && (y + i < OCELO_HEIGHT); i++) {
-      if(ocelo[y + i][x - i]->stone == stone) break;
-      //TODO
-      exit(1); 
+      if(oceloBoard[y + i][x - i]->stone == stone) break;
+      TriggerOfReverse(oceloBoard[y + i][x - i]);
     }
   }
 }
