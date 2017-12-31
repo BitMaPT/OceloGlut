@@ -65,7 +65,7 @@ void StateAutoMaton(Stone *stone) {
     case STONE_STATE_BLACK:
     case STONE_STATE_WHITE:
       return;
-    case STONE_STATE_REVERSE_B2W
+    case STONE_STATE_REVERSE_B2W:
       StateProgress(stone, STONE_STATE_WHITE);
       return;
     case STONE_STATE_REVERSE_W2B:
@@ -85,17 +85,6 @@ void StateProgress(Stone *stone, StoneState next) {
   }
 
   return;
-}
-
-void StartReverse(Stone *stone) {
-  switch(stone->stone) {
-    case STONE_COLOR_BLACK:
-      stone->state = InitStoneStateContena(STONE_STATE_REVERSE_B2W_FIRST);
-      return;
-    case STONE_COLOR_WHITE:
-      stone->state = InitStoneStateContena(STONE_STATE_REVERSE_W2B_FIRST);
-      return;
-  }
 }
 
 StoneStateContena InitStoneStateContena(StoneState state) {
@@ -143,11 +132,11 @@ void TriggerOfReverse(Stone *stone) {
   switch(stone->state.state) {
     case STONE_STATE_BLACK:
       stone->state = InitStoneStateContena(STONE_STATE_REVERSE_B2W);
-      stone->stone = STONE_WHITE;
+      stone->stone = STONE_COLOR_WHITE;
       return;
     case STONE_STATE_WHITE:
       stone->state = InitStoneStateContena(STONE_STATE_REVERSE_W2B);
-      stone->stone = STONE_BLACK;
+      stone->stone = STONE_COLOR_BLACK;
       return;
     default:
       printf("(%s)Error line:%d\n", __FILE__, __LINE__);
