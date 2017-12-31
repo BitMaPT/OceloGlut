@@ -2,7 +2,7 @@
 #define HEADER_OCELOSTONE
 
 #include<GL/glut.h>
-#include"ocelo.h"
+#include"oceloboard.h"
 
 typedef enum OceloStoneColor {
   STONE_COLOR_WHITE,
@@ -12,10 +12,8 @@ typedef enum OceloStoneColor {
 typedef enum StoneState {
   STONE_STATE_BLACK,
   STONE_STATE_WHITE,
-  STONE_STATE_REVERSE_B2W_FIRST,
-  STONE_STATE_REVERSE_B2W_SECOND,
-  STONE_STATE_REVERSE_W2B_FIRST,
-  STONE_STATE_REVERSE_W2B_SECOND
+  STONE_STATE_REVERSE_B2W,
+  STONE_STATE_REVERSE_W2B
 }StoneState;
 
 typedef struct StoneStateContena {
