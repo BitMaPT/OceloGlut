@@ -33,5 +33,6 @@ typedef struct Stone {
 void StoneUpdate(Stone *stone);
 Stone* InitOceloStone(int x, int y, OceloStoneColor type);
 int DrawStone(Stone *stone);
+void TriggerOfReverse(Stone *stone);
 
 #endif

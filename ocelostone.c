@@ -8,12 +8,10 @@
 #define REVERSE_STATE_TIME 500 //(ms)
 
 void StateProgress(Stone *stone, StoneState next);
-StoneStateContena InitStateContena(StoneState state);
+StoneStateContena InitStoneStateContena(StoneState state);
 void StateAutoMaton(Stone *stone);
 int DrawStone(Stone *stone);
 GLdouble CalcAngle(Stone *stone);
-void StoneUpdate(Stone *stone);
-Stone* InitOceloStone(int x, int y, OceloStoneColor type);
 
 void StoneUpdate(Stone *stone) {
   StateAutoMaton(stone);
@@ -30,12 +28,12 @@ Stone* InitOceloStone(int x, int y, OceloStoneColor type) {
   switch(type) {
     case STONE_COLOR_BLACK: 
       stone->stone = STONE_COLOR_BLACK;
-      stone->state = InitStateContena(STONE_STATE_BLACK);
+      stone->state = InitStoneStateContena(STONE_STATE_BLACK);
       stone->angle = 0;
       break;
     case STONE_COLOR_WHITE:
       stone->stone = STONE_COLOR_WHITE;
-      stone->state = InitStateContena(STONE_STATE_WHITE);
+      stone->state = InitStoneStateContena(STONE_STATE_WHITE);
       stone->angle = 180.0;
       break;
     default:
@@ -82,7 +80,7 @@ void StateProgress(Stone *stone, StoneState next) {
   stone->state.stateTime = glutGet(GLUT_ELAPSED_TIME) - stone->state.startTime;
 
   if(stone->state.stateTime > stone->state.shiftTime) {
-    stone->state = InitStateContena(next);
+    stone->state = InitStoneStateContena(next);
     //StateAutoMaton(stone);
   }
 
@@ -92,15 +90,15 @@ void StateProgress(Stone *stone, StoneState next) {
 void StartReverse(Stone *stone) {
   switch(stone->stone) {
     case STONE_COLOR_BLACK:
-      stone->state = InitStateContena(STONE_STATE_REVERSE_B2W_FIRST);
+      stone->state = InitStoneStateContena(STONE_STATE_REVERSE_B2W_FIRST);
       return;
     case STONE_COLOR_WHITE:
-      stone->state = InitStateContena(STONE_STATE_REVERSE_W2B_FIRST);
+      stone->state = InitStoneStateContena(STONE_STATE_REVERSE_W2B_FIRST);
       return;
   }
 }
 
-StoneStateContena InitStateContena(StoneState state) {
+StoneStateContena InitStoneStateContena(StoneState state) {
   StoneStateContena s = {state, 0, 0, 0};
 
   switch(state) {
@@ -141,14 +139,14 @@ int DrawStone(Stone *stone) {
   return 1;
 }
 
-void TiggerOfReverse(Stone *stone) {
+void TriggerOfReverse(Stone *stone) {
   switch(stone->state.state) {
     case STONE_STATE_BLACK:
-      stone->state = InitStateContena(STONE_STATE_REVERSE_B2W);
+      stone->state = InitStoneStateContena(STONE_STATE_REVERSE_B2W);
       stone->stone = STONE_WHITE;
       return;
     case STONE_STATE_WHITE:
-      stone->state = InitStateContena(STONE_STATE_REVERSE_W2B);
+      stone->state = InitStoneStateContena(STONE_STATE_REVERSE_W2B);
       stone->stone = STONE_BLACK;
       return;
     default:
