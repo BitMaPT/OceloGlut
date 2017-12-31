@@ -5,8 +5,8 @@
 #include"ocelo.h"
 
 typedef enum OceloStoneColor {
-  STONE_WHITE,
-  STONE_BLACK
+  STONE_COLOR_WHITE,
+  STONE_COLOR_BLACK
 }OceloStoneColor;
 
 typedef enum StoneState {
@@ -26,14 +26,14 @@ typedef struct StoneStateContena {
 }StoneStateContena;
 
 typedef struct Stone {
-  OceloStone stone;
+  OceloStoneColor stone;
   StoneStateContena state;
   GLdouble angle;
   GLint pos[2];
 }Stone;
 
 void StoneUpdate(Stone *stone);
-Stone* InitOceloStone(int x, int y, OceloStone type);
+Stone* InitOceloStone(int x, int y, OceloStoneColor type);
 int DrawStone(Stone *stone);
 
 #endif

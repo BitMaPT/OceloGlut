@@ -124,6 +124,17 @@ void StateProgress(Stone *stone, StoneState next) {
   return;
 }
 
+void StartReverse(Stone *stone) {
+  switch(stone->stone) {
+    case STONE_COLOR_BLACK:
+      stone->state = InitStateContena(STONE_STATE_REVERSE_B2W_FIRST);
+      return;
+    case STONE_COLOR_WHITE:
+      stone->state = InitStateContena(STONE_STATE_REVERSE_W2B_FIRST);
+      return;
+  }
+}
+
 StoneStateContena InitStateContena(StoneState state) {
   StoneStateContena s = {state, 0, 0, 0};
 
