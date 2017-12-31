@@ -15,25 +15,25 @@ typedef enum AllyState {
   ALLYSTATE_SHOW_YOURTURN,
   ALLYSTATE_CHECKING_PUT,
   ALLYSTATE_WAITING,
-  ALLYSTATE_NONEPUT,
-}
+  ALLYSTATE_NONEPUT
+}AllyState;
 
 typedef enum AllyReverse {
   ALLYREV_READY,
   ALLYREV_ANIMATION
-}
+}AllyReverse;
 
 typedef enum EnemyState {
   ENESTATE_SYNC,
   ENESTATE_SHOW_ENETURN,
   ENESTATE_WATING,
   ENESTATE_NONEPUT
-}
+}EnemyState;
 
 typedef enum EnemyReverse {
   ENEREV_READY,
   ENEREV_ANIMATION
-}
+}EnemyReverse;
 
 typedef union GameDetailState {
   AllyState allyState;
