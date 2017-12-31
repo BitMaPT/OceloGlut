@@ -58,7 +58,5 @@ void ExchangeTurn();
 void ControlGameWithAllyState();
 void GameControlWithAllyRevState();
 
-extern Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
-extern int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 
 #endif

@@ -5,8 +5,6 @@
 #include"gamecontroller.h"
 
 //OceloPlayer playerTurn = PLAYER_BLACK;
-Stone *oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
-int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 static GameState gameState;
 ObjectList objectList;
 
