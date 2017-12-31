@@ -1,14 +1,14 @@
 #include<stdlib.h>
-#include"ocelo.h"
+#include"object.h"
+#include"oceloboard.h"
 #include"ocelostone.h"
 #include"gamecontroller.h"
 
 //OceloPlayer playerTurn = PLAYER_BLACK;
 Stone *oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
-Object *objectList;
 static GameState gameState;
-
+ObjectList objectList;
 
 void ControlGameWithState() {
   switch(gameState.broad) {
@@ -28,14 +28,17 @@ void ControlGameWithAllyState() {
       //sync
       return;
     case ALLYSTATE_SHOW_YOURTURN:
+      //nothing to do
       return;
     case ALLYSTATE_CHECKING_PUT:
-      
+      //checking puttable square
+      //put puttable mark or show signal of no puttable square
       return;
     case ALLYSTATE_WAITING:
+      //check mouse click
       return;
     case ALLYSTATE_NONEPUT:
-
+      //nothing to do
       return;
   }
 }
@@ -43,13 +46,12 @@ void ControlGameWithAllyState() {
 void GameControlWithAllyRevState() {
   switch(gameState.detail.allyRev) {
     case ALLYREV_READY:
-
+      //CheckAllStoneReversed
+      //StartAnimation
+      gameState.detail = ALLYREV_ANIMATION;
       return;
     case ALLYREV_ANIMATION:
-
-      return;
-    case ALLYREV_END:
-
+      //check all stones reversed
       return;
   }
 }
@@ -74,7 +76,6 @@ void InitGame() {
 
   CheckAllSquaresToPut(STONE_BLACK);
 }
-
 
 
 void ClickBoard(int x, int y) {
@@ -110,6 +111,19 @@ void RenewStatus() {
   if(playerTurn == PLAYER_WHITE) stone = STONE_WHITE;
 
   CheckAllSquaresToPut(stone);
+}
+
+void AnimationFinised(GameBroadState broad, GameDetailState detail) {
+  gameState.broad = broad;
+  gameState.detail = detail;
+}
+
+//Check reverse animation ended
+void CheckAllStoneReversed() {
+  if(/*object is stone*/) {
+    //check all stone
+    //if stone is animation yet, return 0 else return 1
+  }
 }
 
 int MousePositionToSquarePosition(int x, int y, int *xx, int *yy) {

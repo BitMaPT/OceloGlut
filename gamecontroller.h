@@ -20,8 +20,7 @@ typedef enum AllyState {
 
 typedef enum AllyReverse {
   ALLYREV_READY,
-  ALLYREV_ANIMATION,
-  ALLYREV_END
+  ALLYREV_ANIMATION
 }
 
 typedef enum EnemyState {
@@ -33,8 +32,7 @@ typedef enum EnemyState {
 
 typedef enum EnemyReverse {
   ENEREV_READY,
-  ENEREV_ANIMATION,
-  ENEREV_END
+  ENEREV_ANIMATION
 }
 
 typedef union GameDetailState {
