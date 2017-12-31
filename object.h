@@ -18,6 +18,12 @@ typedef struct Object {
   ObjectBody object;
 }Object;
 
+typedef struct ObjectList {
+  Object *list;
+  int lenght;
+  int max;
+}ObjectList;
+
 int DrawObject(Object *obj);
 
 #endif
