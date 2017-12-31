@@ -1,7 +1,8 @@
 #ifndef HEADER_OCELO
 #define HEADER_OCELO
 
-#include"gamecontroller.h"
+#include "gamecontroller.h"
+#include "ocelostone.h"
 
 #define OCELO_WIDTH 8
 #define OCELO_HEIGHT 8
@@ -18,7 +19,7 @@ int CanPutUpLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
 int CanPutBelowRight(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
 int CanPutBelowLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
 
-extern Stone *oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
+extern Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 extern int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 
 #endif

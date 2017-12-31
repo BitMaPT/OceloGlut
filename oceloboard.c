@@ -3,7 +3,8 @@
 #include"oceloboard.h"
 #include"ocelostone.h"
 
-//int ocelo[OCELO_HEIGHT][OCELO_WIDTH];
+Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
+int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 
 void PutStone(int x, int y, OceloStoneColor mine) {
   int i;
@@ -17,55 +18,55 @@ void PutStone(int x, int y, OceloStoneColor mine) {
   if(CanPutRight(x, y, mine, enemy)) {
     for(i = x + 1; i < OCELO_WIDTH; i++) {
       if(oceloBoard[y][i]->stone == mine) break;
-      TriggerOfReverse(oceloboard[y][i]);
-    }
-  }
-
-  if(CanPutLeft(x, y, stone, enemy)) {
-    for(i = x - 1; i >= 0; i--) {
-      if(oceloBoard[y][i]->stone == stone) break;
       TriggerOfReverse(oceloBoard[y][i]);
     }
   }
 
-  if(CanPutUp(x, y, stone, enemy)) {
+  if(CanPutLeft(x, y, mine, enemy)) {
+    for(i = x - 1; i >= 0; i--) {
+      if(oceloBoard[y][i]->stone == mine) break;
+      TriggerOfReverse(oceloBoard[y][i]);
+    }
+  }
+
+  if(CanPutUp(x, y, mine, enemy)) {
     for(i = y - 1; i >= 0; i--) {
-      if(oceloBoard[i][x]->stone == stone) break;
+      if(oceloBoard[i][x]->stone == mine) break;
       TriggerOfReverse(oceloBoard[i][x]);
     }
   }
 
-  if(CanPutBelow(x, y, stone, enemy)) {
+  if(CanPutBelow(x, y, mine, enemy)) {
     for(i = y + 1; i < OCELO_HEIGHT; i++) {
-      if(oceloBoard[i][x]->stone == stone) break;
+      if(oceloBoard[i][x]->stone == mine) break;
       TriggerOfReverse(oceloBoard[i][x]);
     }
   }
 
-  if(CanPutUpRight(x, y, stone, enemy)) {
+  if(CanPutUpRight(x, y, mine, enemy)) {
     for(i = 1; (x + i < OCELO_WIDTH) && (y - i >= 0); i++) {
-      if(oceloBoard[y - i][x + i]->stone == stone) break;
+      if(oceloBoard[y - i][x + i]->stone == mine) break;
       TriggerOfReverse(oceloBoard[y - i][x + i]);
     }
   }
 
-  if(CanPutUpLeft(x, y, stone, enemy)) {
+  if(CanPutUpLeft(x, y, mine, enemy)) {
     for(i = 1; (x - i >= 0) && (y - i >= 0); i++) {
-      if(oceloBoard[y - i][x - i]->stone == stone) break;
+      if(oceloBoard[y - i][x - i]->stone == mine) break;
       TriggerOfReverse(oceloBoard[y - i][x - i]);
     }
   }
 
-  if(CanPutBelowRight(x, y, stone, enemy)) {
+  if(CanPutBelowRight(x, y, mine, enemy)) {
     for(i = 1; (x + i < OCELO_WIDTH) && (y + i < OCELO_HEIGHT); i++) {
-      if(oceloBoard[y + i][x + i]->stone == stone) break;
+      if(oceloBoard[y + i][x + i]->stone == mine) break;
       TriggerOfReverse(oceloBoard[y + i][x + i]);
     }
   }
 
-  if(CanPutBelowLeft(x, y, stone, enemy)) {
+  if(CanPutBelowLeft(x, y, mine, enemy)) {
     for(i = 1; (x - i >= 0) && (y + i < OCELO_HEIGHT); i++) {
-      if(oceloBoard[y + i][x - i]->stone == stone) break;
+      if(oceloBoard[y + i][x - i]->stone == mine) break;
       TriggerOfReverse(oceloBoard[y + i][x - i]);
     }
   }
@@ -100,117 +101,125 @@ int CanPut(int x, int y, OceloStoneColor mine) {
   return 0;
 }
 
-int CanPutRight(int x, int y, OceloStoneColor stone, OceloStoneColor enemy) {
+int CanPutRight(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
 
   if(x == OCELO_WIDTH - 1) return 0;
-  if(ocelo[y][x + 1] != enemy) return 0;
+  if(oceloBoard[y][x + 1] == NULL) return 0;
+  if(oceloBoard[y][x + 1]->stone != enemy) return 0;
 
-  for(i = x + 1; i < OCELO_WIDTH; i++) {
-    if(ocelo[y][i] == stone) return 1;
-    if(ocelo[y][i] == OCELO_STONE_NONE) return 0;
+  for(i = x + 2; i < OCELO_WIDTH; i++) {
+    if(oceloBoard[y][i] == NULL) return 0;
+    if(oceloBoard[y][i]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy) {
+int CanPutLeft(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
 
   if(x == 0) return 0;
-  if(ocelo[y][x - 1] != enemy) return 0;
+  if(oceloBoard[y][x - 1] == NULL) return 0;
+  if(oceloBoard[y][x - 1]->stone != enemy) return 0;
 
-  for(i = x - 1; i >= 0; i--) {
-    if(ocelo[y][i] == stone) return 1;
-    if(ocelo[y][i] == OCELO_STONE_NONE) return 0;
+  for(i = x - 2; i >= 0; i--) {
+    if(oceloBoard[y][i] == NULL) return 0;
+    if(oceloBoard[y][i]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutUp(int x, int y, OceloStoneColor stone, OceloStoneColor enemy) {
+int CanPutUp(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
   
   if(y == 0) return 0;
-  if(ocelo[y - 1][x] != enemy) return 0;
+  if(oceloBoard[y - 1][x] == NULL) return 0;
+  if(oceloBoard[y - 1][x]->stone != enemy) return 0;
 
   for(i = y - 1; i >= 0; i--) {
-    if(ocelo[i][x] == stone) return 1;
-    if(ocelo[i][x] == OCELO_STONE_NONE) return 0;
+    if(oceloBoard[i][x] == NULL) return 0;
+    if(oceloBoard[i][x]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutBelow(int x, int y, OceloStoneColor stone, OceloStoneColor enemy) {
+int CanPutBelow(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
 
   if(y == OCELO_HEIGHT - 1) return 0;
-  if(ocelo[y + 1][x] != enemy) return 0;
+  if(oceloBoard[y + 1][x] == NULL) return 0;
+  if(oceloBoard[y + 1][x]->stone != enemy) return 0;
 
   for(i = y + 1; i < OCELO_HEIGHT; i++) {
-    if(ocelo[i][x] == stone) return 1;
-    if(ocelo[i][x] == OCELO_STONE_NONE) return 0;
+    if(oceloBoard[i][x] == NULL) return 0;
+    if(oceloBoard[i][x]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutUpRight(int x, int y, OceloStone stone, OceloStone enemy) {
+int CanPutUpRight(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
 
   if(x == OCELO_WIDTH - 1) return 0;
   if(y == 0) return 0;
-  if(ocelo[y - 1][x + 1] != enemy) return 0;
+  if(oceloBoard[y - 1][x + 1] == NULL) return 0;
+  if(oceloBoard[y - 1][x + 1]->stone != enemy) return 0;
 
   for(i = 1; (x + i < OCELO_WIDTH) && (y - i >= 0); i++) {
-    if(ocelo[y - i][x + i] == stone) return 1;
-    if(ocelo[y - i][x + i] == OCELO_STONE_NONE) return 0;
+    if(oceloBoard[y - i][x + i] == NULL) return 0;
+    if(oceloBoard[y - i][x + i]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutUpLeft(int x, int y, OceloStone stone, OceloStone enemy) {
+int CanPutUpLeft(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
 
   if(x == 0) return 0;
   if(y == 0) return 0;
-  if(ocelo[y - 1][x - 1] != enemy) return 0;
+  if(oceloBoard[y - 1][x - 1] == NULL) return 0;
+  if(oceloBoard[y - 1][x - 1]->stone != enemy) return 0;
 
   for(i = 1; (x - i >= 0) && (y - i >= 0); i++) {
-    if(ocelo[y - i][x - i] == stone) return 1;
-    if(ocelo[y - i][x - i] == OCELO_STONE_NONE) return 0;
+    if(oceloBoard[y - i][x - i] == NULL) return 0;
+    if(oceloBoard[y - i][x - i]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutBelowRight(int x, int y, OceloStone stone, OceloStone enemy) {
+int CanPutBelowRight(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
 
   if(x == OCELO_WIDTH - 1) return 0;
   if(y == OCELO_HEIGHT - 1) return 0;
-  if(ocelo[y + 1][x + 1] != enemy) return 0;
+  if(oceloBoard[y + 1][x + 1] == NULL) return 0;
+  if(oceloBoard[y + 1][x + 1]->stone != enemy) return 0;
 
   for(i = 1; (x + i < OCELO_WIDTH) && (y + i < OCELO_HEIGHT); i++) {
-    if(ocelo[y + i][x + i] == stone) return 1;
-    if(ocelo[y + i][x + i] == OCELO_STONE_NONE) return 0;
+    if(oceloBoard[y + i][x + i] == NULL) return 0;
+    if(oceloBoard[y + i][x + i]->stone == mine) return 1;
   }
 
   return 0;
 }
 
-int CanPutBelowLeft(int x, int y, OceloStone stone, OceloStone enemy) {
+int CanPutBelowLeft(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   int i;
   
   if(x == 0) return 0;
   if(y == OCELO_HEIGHT - 1) return 0;
-  if(ocelo[y + 1][x - 1] != enemy) return 0;
+  if(oceloBoard[y + 1][x - 1] == NULL) return 0;
+  if(oceloBoard[y + 1][x - 1]->stone != enemy) return 0;
 
   for(i = 1; (x - i >= 0) && (y + i < OCELO_HEIGHT); i++) {
-    if(ocelo[y + i][x - i] == stone) return 1;
-    if(ocelo[y + i][x - i] == OCELO_STONE_NONE) return 0;
+    if(oceloBoard[y + i][x - i] == NULL) return 0;
+    if(oceloBoard[y + i][x - i]->stone == mine) return 1;
   } 
 
   return 0;
