@@ -7,6 +7,7 @@
 //OceloPlayer playerTurn = PLAYER_BLACK;
 static GameState gameState;
 ObjectList objectList;
+OceloStoneColor playerColor;
 
 void ControlGameWithState() {
   switch(gameState.broad) {
@@ -31,6 +32,8 @@ void ControlGameWithAllyState() {
     case ALLYSTATE_CHECKING_PUT:
       //checking puttable square
       //put puttable mark or show signal of no puttable square
+      CheckAllSquaresToPut(playerColor);
+
       return;
     case ALLYSTATE_WAITING:
       //check mouse click

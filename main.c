@@ -1,7 +1,8 @@
 #include<GL/glut.h>
 #include"graphicocelo.h"
-#include"ocelo.h"
+#include"oceloboard.h"
 #include"gamecontroller.h"
+#include"object.h"
 
 #define WIDTH 640
 #define HEIGHT 640
