@@ -19,11 +19,14 @@ typedef struct Object {
 }Object;
 
 typedef struct ObjectList {
-  Object *list;
+  Object **list;
   int lenght;
   int max;
 }ObjectList;
 
-int DrawObject(Object *obj);
+int DrawAllObject();
+int ObjectListInit();
+int DeleteAllObject();
+int AddObject(Object *obj);
 
 #endif
