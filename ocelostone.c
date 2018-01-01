@@ -3,6 +3,7 @@
 #include<GL/glut.h>
 #include<math.h>
 #include"ocelostone.h"
+#include"object.h"
 
 #define CIRCLE_VERTEX 100
 #define REVERSE_STATE_TIME 500 //(ms)
@@ -21,9 +22,12 @@ void StoneUpdate(Stone *stone) {
 //this function generates OceloStone and set initial setting
 Stone* InitOceloStone(int x, int y, OceloStoneColor type) {
   Stone *stone;
+  Object *obj;
 
   stone = (Stone*)malloc(sizeof(Stone));
   if(stone == NULL) return NULL;
+  obj = (Object*)malloc(sizeof(Object));
+  if(obj == NULL) return NULL;
 
   switch(type) {
     case STONE_COLOR_BLACK: 
@@ -43,6 +47,11 @@ Stone* InitOceloStone(int x, int y, OceloStoneColor type) {
 
   stone->pos[0] = x;
   stone->pos[1] = y;
+
+  obj->type = OBJECT_OCELO_STONE;
+  obj->object.stone = stone;
+
+  if(AddObject(obj) == 0) return NULL;
 
   return stone;
 }
