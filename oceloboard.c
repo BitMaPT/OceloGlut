@@ -3,6 +3,16 @@
 #include"oceloboard.h"
 #include"ocelostone.h"
 
+int CanPut(int x, int y, OceloStoneColor stone);
+int CanPutRight(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutUp(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutBelow(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutUpRight(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutUpLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutBelowRight(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+int CanPutBelowLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
+
 Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 
