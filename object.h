@@ -21,7 +21,7 @@ typedef struct Object {
 
 typedef struct ObjectList {
   Object **list;
-  int lenght;
+  int length;
   int max;
 }ObjectList;
 

@@ -12,7 +12,7 @@ int ObjectListInit() {
   list.list = (Object**)malloc(sizeof(Object*) * 10);
   if(list.list == NULL) return 0;
 
-  list.lenght = 0;
+  list.length = 0;
   list.max = 10;
 
   return 1;
@@ -21,7 +21,7 @@ int ObjectListInit() {
 int UpdateAllObject() {
   int i;
 
-  for(i = 0; i < list.lenght; i++) {
+  for(i = 0; i < list.length; i++) {
     UpdateObject(list.list[i]);
   }
 
@@ -31,7 +31,7 @@ int UpdateAllObject() {
 int DrawAllObject() {
   int i;
 
-  for(i = 0; i < list.lenght; i++) {
+  for(i = 0; i < list.length; i++) {
     DrawObject(list.list[i]);
   }
 
@@ -71,14 +71,14 @@ int UpdateObject(Object *obj) {
 }
 
 int AddObject(Object *obj) {
-  if(list.lenght == list.max) {
+  if(list.length == list.max) {
     list.max *= 2;
     list.list = (Object**)malloc(sizeof(Object*) * list.max);
     if(list.list == NULL) return 0;
   }
 
-  list.list[list.lenght] = obj;
-  list.lenght++;
+  list.list[list.length] = obj;
+  list.length++;
 
   return 1;
 }
@@ -86,10 +86,45 @@ int AddObject(Object *obj) {
 int DeleteAllObject() {
   int i;
 
-  for(i = 0; i < list.lenght; i++) {
+  for(i = 0; i < list.length; i++) {
     free(list.list[i]);
   }
   free(list.list);
 
   return ObjectListInit();
+}
+
+int DeleteSelectedTypeObject(ObjectType type) {
+  int i, j;
+  int *deleteList;
+  ObjectList oldList;
+  ObjectList newList;
+
+  newList.list = (Object**)malloc(sizeof(Object*) * oldList.max);
+  newList.max = oldList.max;
+  if(newList.list == NULL) return 0;
+
+  oldList = list;
+
+  for(i = 0; i < list.length; i++) {
+    if(oldList.list[i]->type == type) {
+      switch(type) {
+        case OBJECT_OCELO_STONE:
+          free(oldList.list[i]->object.stone);
+          break;
+        case OBJECT_SELECTABLE_POINT:
+          free(oldList.list[i]->object.point);
+          break;
+      }
+      continue;
+    }
+
+    newList.list[j++] = oldList.list[i];
+  }
+
+  newList.length = oldList.length - j;
+  free(oldList.list);
+  list = newList;
+  
+  return 1;
 }
