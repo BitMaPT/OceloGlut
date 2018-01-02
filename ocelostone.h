@@ -30,7 +30,7 @@ typedef struct Stone {
   GLint pos[2];
 }Stone;
 
-void StoneUpdate(Stone *stone);
+void UpdateStone(Stone *stone);
 Stone* InitOceloStone(int x, int y, OceloStoneColor type);
 int DrawStone(Stone *stone);
 void TriggerOfReverse(Stone *stone);

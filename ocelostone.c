@@ -14,7 +14,7 @@ void StateAutoMaton(Stone *stone);
 int DrawStone(Stone *stone);
 GLdouble CalcAngle(Stone *stone);
 
-void StoneUpdate(Stone *stone) {
+void UpdateStone(Stone *stone) {
   StateAutoMaton(stone);
   stone->angle = CalcAngle(stone);
 }
