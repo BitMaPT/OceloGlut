@@ -128,3 +128,16 @@ int DeleteSelectedTypeObject(ObjectType type) {
 
   return 1;
 }
+
+int CheckAllReverseAnimationEnded() {
+  int i;
+
+  for(i = 0; i < list.length; i++) {
+    if(list.list[i]->type == OBJECT_OCELO_STONE) {
+      if(list.list[i]->object.stone->state.state == STONE_STATE_REVERSE_B2W) return 0;
+      if(list.list[i]->object.stone->state.state == STONE_STATE_REVERSE_W2B) return 0;
+    }
+  }
+
+  return 1;
+}

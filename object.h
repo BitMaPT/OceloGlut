@@ -31,5 +31,6 @@ int ObjectListInit();
 int DeleteAllObject();
 int AddObject(Object *obj);
 int DeleteSelectedTypeObject(ObjectType type);
+int CheckAllReverseAnimationEnded();
 
 #endif
