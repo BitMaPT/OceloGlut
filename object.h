@@ -26,6 +26,7 @@ typedef struct ObjectList {
 }ObjectList;
 
 int DrawAllObject();
+int UpdateAllObject();
 int ObjectListInit();
 int DeleteAllObject();
 int AddObject(Object *obj);
