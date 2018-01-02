@@ -33,7 +33,7 @@ void ControlGameWithAllyState() {
       //checking puttable square
       //put puttable mark or show signal of no puttable square
       CheckAllSquaresToPut(playerColor);
-
+      GenerateSelectablePutPoint();
       return;
     case ALLYSTATE_WAITING:
       //check mouse click
