@@ -1,5 +1,4 @@
 #include<GL/glut.h>
-#include"graphicocelo.h"
 #include"oceloboard.h"
 #include"gamecontroller.h"
 #include"object.h"
@@ -11,8 +10,10 @@ void Display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
 
-  DrawBoard();
-  DrawStones();
+  glLoadIdentity();
+  glOrtho(0, WIDTH, HEIGHT, 0, -300.0, 300.0);
+
+  DrawAllObject();
 
   glutSwapBuffers();
 }
@@ -40,6 +41,9 @@ void Idle() {
 
   if(timenow > timestd) {
     timestd += timestd + (1000 / 60);
+    
+    UpdateAllObject();
+
     glutPostRedisplay();
   }
 }

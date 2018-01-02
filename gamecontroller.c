@@ -47,8 +47,8 @@ void ControlGameWithAllyState() {
 void GameControlWithAllyRevState() {
   switch(gameState.detail.allyRev) {
     case ALLYREV_READY:
-      //CheckAllStoneReversed
       //StartAnimation
+      DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
       gameState.detail = ALLYREV_ANIMATION;
       return;
     case ALLYREV_ANIMATION:
@@ -70,12 +70,6 @@ void InitGame() {
   oceloBoard[3][4] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][3] = InitOceloStone(4, 3, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
-
-
-
-  //playerTurn = PLAYER_BLACK;
-
-  CheckAllSquaresToPut(STONE_BLACK);
 }
 
 

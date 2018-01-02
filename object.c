@@ -125,6 +125,6 @@ int DeleteSelectedTypeObject(ObjectType type) {
   newList.length = oldList.length - j;
   free(oldList.list);
   list = newList;
-  
+
   return 1;
 }
