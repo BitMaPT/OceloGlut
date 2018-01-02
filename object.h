@@ -2,15 +2,16 @@
 #define HEADER_OBJECT
 
 #include"ocelostone.h"
+#include"putpoint.h"
 
 typedef enum ObjectType {
   OBJECT_OCELO_STONE,
-  OBJECT_SELECTABLE_PANEL
+  OBJECT_SELECTABLE_POINT
 }ObjectType;
 
 typedef union ObjectBody {
   Stone *stone;
-
+  OceloPoint *point;
 }ObjectBody;
 
 typedef struct Object {
