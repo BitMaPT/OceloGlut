@@ -1,3 +1,4 @@
+#include<stdio.h>
 #include<stdlib.h>
 #include"gamecontroller.h"
 #include"oceloboard.h"
@@ -80,6 +81,23 @@ void PutStone(int x, int y, OceloStoneColor mine) {
       TriggerOfReverse(oceloBoard[y + i][x - i]);
     }
   }
+}
+
+int GenerateSelectablePutPoint() {
+  int x, y;
+
+  for(x = 0; x < OCELO_WIDTH; x++) {
+    for(y = 0; y < OCELO_HEIGHT; y++) {
+      if(oceloCanPut[y][x]) {
+        if(InitOceloPoint(x, y) == NULL) {
+          printf("(%s)Error line:%d\n", __FILE__, __LINE__);
+          exit(1);
+        }
+      }
+    }
+  }
+
+  return 1;
 }
 
 void CheckAllSquaresToPut(OceloStoneColor stone) {

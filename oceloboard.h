@@ -9,6 +9,7 @@
 
 void PutStone(int x, int y, OceloStoneColor stone);
 void CheckAllSquaresToPut(OceloStoneColor stone);
+int GenerateSelectablePutPoint();
 
 extern Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 extern int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
