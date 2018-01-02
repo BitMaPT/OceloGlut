@@ -4,6 +4,9 @@
 #include"ocelostone.h"
 #include"gamecontroller.h"
 
+void WaitingClick();
+int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
+
 //OceloPlayer playerTurn = PLAYER_BLACK;
 static GameState gameState;
 ObjectList objectList;
@@ -37,6 +40,7 @@ void ControlGameWithAllyState() {
       return;
     case ALLYSTATE_WAITING:
       //check mouse click
+      WaitingClick();
       return;
     case ALLYSTATE_NONEPUT:
       //nothing to do
@@ -49,7 +53,7 @@ void GameControlWithAllyRevState() {
     case ALLYREV_READY:
       //StartAnimation
       DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
-      gameState.detail = ALLYREV_ANIMATION;
+      gameState.detail.allyRev = ALLYREV_ANIMATION;
       return;
     case ALLYREV_ANIMATION:
       //check all stones reversed
@@ -121,6 +125,27 @@ void CheckAllStoneReversed() {
   }
 }
 
+void WaitingClick() {
+  int x, y;
+
+  if(GetMouseClickPos(&x, &y)) {
+    int xx, yy;
+
+    if(MousePositionToSquarePosition(x, y, &xx, &yy)) {
+      PutStone(xx, yy, );
+    }
+  }
+}
+
 int MousePositionToSquarePosition(int x, int y, int *xx, int *yy) {
-  
+  if(x < 40 || x >= 40 + 70 * OCELO_WIDTH)  return 0;
+  if(y < 40 || y >= 40 + 70 * OCELO_HEIGHT) return 0;
+
+  x = x - 40;
+  y = y - 40;
+
+  *xx = x / 70;
+  *yy = y / 70;
+
+  return 1;
 }

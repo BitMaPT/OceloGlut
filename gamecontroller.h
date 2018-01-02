@@ -51,7 +51,6 @@ void InitGame();
 void WaitPutStone();
 void StartTurn();
 void ClickBoard();
-int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
 void RenewStatus();
 void ExchangeTurn();
 
