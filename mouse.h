@@ -1,8 +1,9 @@
 #ifndef HEADER_MOUSE
 #define HEADER_MOUSE
 
-void MouseClicked(int xx, int yy);
-int GetMouseClickPos(int *xx, int *yy);
-void UpdateMouse();
+void Mouse(int button, int state, int x, int y);
+void ResetMouseState();
+int GetMouseDown(int button, int *x, int *y);
+int GetMouseUp(int button, int *x, int *y);
 
 #endif
