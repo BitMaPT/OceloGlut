@@ -100,7 +100,7 @@ int GenerateSelectablePutPoint() {
   return 1;
 }
 
-void CheckAllSquaresToPut(OceloStoneColor stone) {
+int CheckAllSquaresToPut(OceloStoneColor stone) {
   int x, y;
 
   for(x = 0; x < OCELO_WIDTH; x++) {
@@ -108,6 +108,14 @@ void CheckAllSquaresToPut(OceloStoneColor stone) {
       oceloCanPut[y][x] = CanPut(x, y, stone);
     }
   }
+
+  for(x = 0; x < OCELO_WIDTH; x++) {
+    for(y = 0; y < OCELO_HEIGHT; y++) {
+      if(oceloCanPut[y][x]) return 1;
+    }
+  }
+  
+  return 0;
 }
 
 int CanPut(int x, int y, OceloStoneColor mine) {

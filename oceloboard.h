@@ -8,7 +8,7 @@
 #define OCELO_HEIGHT 8
 
 void PutStone(int x, int y, OceloStoneColor stone);
-void CheckAllSquaresToPut(OceloStoneColor stone);
+int CheckAllSquaresToPut(OceloStoneColor stone);
 int GenerateSelectablePutPoint();
 
 extern Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
