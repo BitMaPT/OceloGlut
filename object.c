@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"ocelostone.h"
+#include"putpoint.h"
+#include"string3d.h"
 #include"object.h"
 
 int DrawObject(Object *obj);
@@ -51,6 +53,9 @@ int DrawObject(Object *obj) {
     case OBJECT_SELECTABLE_POINT:
       DrawPoint(obj->object.point);
       break;
+    case OBJECT_STRING:
+      DrawString(obj->object.string);
+      break;
     default:
       printf("(%s)Error line:%d\n", __FILE__, __LINE__);
       exit(1);
@@ -66,6 +71,9 @@ int UpdateObject(Object *obj) {
       break;
     case OBJECT_SELECTABLE_POINT:
       UpdatePoint(obj->object.point);
+      break;
+    case OBJECT_STRING:
+      UpdateString(obj->object.string);
       break;
     default:
       printf("(%s)Error line:%d\n", __FILE__, __LINE__);
@@ -171,4 +179,29 @@ int DeleteObjectList(ObjectList *list) {
   free(list->obj);
   free(list);
   return 1;
+}
+
+int DeleteString(String3D *str) {
+  ObjectList *list, *before;
+
+  list = head.next;
+  before = &head;
+  while(list) {
+    if(list->obj->type == OBJECT_STRING) {
+      if(list->obj->object.string == str) {
+        before->next = list->next;
+        if(list == last) {
+          last = before;
+        }
+
+        DeleteObjectList(list);
+        return 1;
+      }
+    }
+
+    before = list;
+    list = list->next;
+  }
+
+  return 0;
 }

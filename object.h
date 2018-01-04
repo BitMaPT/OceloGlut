@@ -34,5 +34,6 @@ int DeleteAllObject();
 int DeleteObject(Object *obj);
 int AddObject(Object *obj);
 int DeleteSelectedTypeObject(ObjectType type);
+int DeleteString(String3D *str);
 
 #endif
