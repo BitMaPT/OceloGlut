@@ -47,8 +47,8 @@ void InitGame() {
   }
 
   oceloBoard[3][3] = InitOceloStone(3, 3, STONE_COLOR_BLACK);
-  oceloBoard[3][4] = InitOceloStone(4, 3, STONE_COLOR_BLACK);
-  oceloBoard[4][3] = InitOceloStone(3, 4, STONE_COLOR_BLACK);
+  oceloBoard[3][4] = InitOceloStone(4, 3, STONE_COLOR_WHITE);
+  oceloBoard[4][3] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
 
   myStoneColor = STONE_COLOR_BLACK;

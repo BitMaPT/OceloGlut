@@ -15,8 +15,11 @@ void DrawString(String3D *str) {
 
   glPushAttrib(GL_LINE_BIT);
 
-  glTranslated((GLdouble)str->pos[0], (GLdouble)str->pos[1], 0);
-  glRotated(str->angle, 0, 1.0, 0);
+  glutStrokeLength(str->font, (unsigned char*)str->str);
+
+  glTranslated(str->pos[0] - glutStrokeLength(str->font, (unsigned char*)str->str) / 4, str->pos[1], 0);
+  glRotated(str->angle + 180, 1, 0, 0);
+  glScaled(0.5, 0.5, 0.5);
 
   for(i = 0; str->str[i]; i++) {
     glutStrokeCharacter(str->font, str->str[i]);
@@ -45,6 +48,7 @@ String3D* InitString(int x, int y, char *str) {
   str3d->angle = 0;
   str3d->str = dstStr;
   str3d->anim = anim;
+  str3d->font = GLUT_STROKE_ROMAN;
 
 
   obj->object.string = str3d;
@@ -64,7 +68,7 @@ void StringAnim(String3D *str) {
   } else if (str->anim.stateTime >= 1000 && str->anim.stateTime < 2000) {
     str->angle = 0;
   } else {
-    str->angle = -(90.0 / 1000.0) * str->anim.startTime + 180;
+    str->angle = -(90.0 / 1000.0) * str->anim.stateTime + 180;
   }
 
   if(str->anim.stateTime >= 3000) {
