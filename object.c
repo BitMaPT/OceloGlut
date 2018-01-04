@@ -133,23 +133,6 @@ int DeleteSelectedTypeObject(ObjectType type) {
   return 1;
 }
 
-int CheckAllReverseAnimationEnded() {
-  ObjectList *list;
-
-  list = head.next;
-  while(list) {
-    if(list->obj->type == OBJECT_OCELO_STONE) {
-      switch(list->obj->object.stone->state.state) {
-        case STONE_STATE_REVERSE_B2W: return 0;
-        case STONE_STATE_REVERSE_W2B: return 0;
-        default: break;
-      }
-    }
-  }
-
-  return 1;
-}
-
 int DeleteObject(Object *obj) {
   ObjectList *list, *before;
 
@@ -162,13 +145,14 @@ int DeleteObject(Object *obj) {
         last = before;
       }
       DeleteObjectList(list);
-      list = before->next;
-      continue;
+      return 1;
     }
 
     before = list;
     list = list->next;
   }
+
+  return 0;
 }
 
 int DeleteObjectList(ObjectList *list) {
