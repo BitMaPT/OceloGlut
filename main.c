@@ -42,6 +42,7 @@ void Idle() {
   if(timenow > timestd) {
     timestd += timestd + (1000 / 60);
     
+    ControlGameWithState();
     UpdateAllObject();
 
     glutPostRedisplay();

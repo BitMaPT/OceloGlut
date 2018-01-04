@@ -16,7 +16,6 @@ int CanPutBelowLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
 
 Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
-Stone **oceloReverseStones;
 
 void PutStone(int x, int y, OceloStoneColor mine) {
   int i;

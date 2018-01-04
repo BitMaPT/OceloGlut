@@ -5,7 +5,8 @@ typedef enum AllyState {
   ALLYSTATE_SYNC,
   ALLYSTATE_CHECKING_PUT,
   ALLYSTATE_WAITING,
-  ALLYSTATE_NONEPUT
+  ALLYSTATE_NONEPUT,
+  ALLYSTATE_REVERSE
 }AllyState;
 
 void GameControlWithAllyState();

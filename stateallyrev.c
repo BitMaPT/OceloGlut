@@ -8,7 +8,7 @@ void GameControlWithAllyRevState() {
   switch(gameState.detail.allyRev) {
     case ALLYREV_READY:
       //StartAnimation
-      DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
+      
       gameState.detail.allyRev = ALLYREV_ANIMATION;
       return;
     case ALLYREV_ANIMATION:

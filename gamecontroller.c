@@ -50,6 +50,9 @@ void InitGame() {
   oceloBoard[3][4] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][3] = InitOceloStone(4, 3, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
+
+  gameState.broad = GAMESTATE_ALLY;
+  gameState.detail.allyState = ALLYSTATE_CHECKING_PUT;
 }
 
 void AnimationFinised(GameBroadState broad, GameDetailState detail) {

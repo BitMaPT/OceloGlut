@@ -5,6 +5,7 @@
 #include"mouse.h"
 #include"string3d.h"
 #include"oceloboard.h"
+#include"object.h"
 
 void WaitingClick();
 
@@ -21,7 +22,7 @@ void GameControlWithAllyState() {
         gameState.detail.allyState = ALLYSTATE_WAITING;
       } else {
         //start animation of sign of no possible position to put
-        if(InitString(640 / 2, 480 / 2, "NONE to PUT") == NULL) exit(1);
+        if(InitString(glutGet(GLUT_WINDOW_WIDTH) / 2, glutGet(GLUT_WINDOW_HEIGHT) / 2, "NONE to PUT") == NULL) exit(1);
         gameState.detail.allyState = ALLYSTATE_NONEPUT;
       }
       return;
@@ -31,6 +32,12 @@ void GameControlWithAllyState() {
       return;
     case ALLYSTATE_NONEPUT:
       //nothing to do
+      return;
+    case ALLYSTATE_REVERSE:
+      if(CheckAllStoneReversed()) {
+        gameState.broad = GAMESTATE_ENEMY;
+        gameState.detail.EneState = ENESTATE_SYNC;
+      }
       return;
   }
 }
@@ -44,8 +51,9 @@ void WaitingClick() {
     if(MousePositionToSquarePosition(x, y, &xx, &yy)) {
       if(oceloCanPut[yy][xx]){
         PutStone(xx, yy, myStoneColor);
-        gameState.broad = GAMESTATE_REVERSE_ALLY;
-        gameState.detail.allyRev = ALLYREV_READY;
+        DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
+      
+        gameState.detail.allyState = ALLYSTATE_REVERSE;
       }
     }
   }
