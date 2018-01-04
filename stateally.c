@@ -40,7 +40,7 @@ void WaitingClick() {
     int xx, yy;
 
     if(MousePositionToSquarePosition(x, y, &xx, &yy)) {
-      if(oceloCanPut[y][x]){
+      if(oceloCanPut[yy][xx]){
         PutStone(xx, yy, myStoneColor);
         gameState.broad = GAMESTATE_REVERSE_ALLY;
         gameState.detail.allyRev = ALLYREV_READY;
