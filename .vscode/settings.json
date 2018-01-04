@@ -1,9 +1,11 @@
 {
   "files.associations": {
+    "*.c": "c",
     "ocelostone.h": "c",
     "oceloboard.h": "c",
     "glut.h": "c",
-    "gamecontroller.h": "c"
+    "gamecontroller.h": "c",
+    "object.h": "c"
   },
   "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }
