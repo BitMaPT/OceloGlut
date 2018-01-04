@@ -4,16 +4,19 @@
 #include"oceloboard.h"
 #include"ocelostone.h"
 #include"gamecontroller.h"
+#include"mouse.h"
 
 void WaitingClick();
 int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
-void CheckAllStoneReversed(GameBroadState broad);
 void ControlGameWithAllyState();
 void GameControlWithAllyRevState();
 void GameControlWithEnemyState();
 void GameControlWithEnemyRevState();
 
+int RecvEnemyCanPut();
+void RecvEnemyPut();
 
+static OceloStoneColor myStoneColor;
 
 //OceloPlayer playerTurn = PLAYER_BLACK;
 static GameState gameState;
@@ -29,7 +32,10 @@ void ControlGameWithState() {
       GameControlWithAllyRevState();
       return;
     case GAMESTATE_ENEMY:
+      GameControlWithEnemyState();
+      return;
     case GAMESTATE_REVERSE_ENEMY:
+      GameControlWithEnemyRevState();
       return;
   }
 }
@@ -72,7 +78,10 @@ void GameControlWithAllyRevState() {
       return;
     case ALLYREV_ANIMATION:
       //check all stones reversed
-      CheckAllStoneReversed(GAMESTATE_REVERSE_ALLY);
+      if(CheckAllStoneReversed()) {
+        gameState.broad = GAMESTATE_ENEMY;
+        gameState.detail.EneState = ENESTATE_SYNC;
+      }
       return;
   }
 }
@@ -80,12 +89,23 @@ void GameControlWithAllyRevState() {
 void GameControlWithEnemyState() {
   switch(gameState.detail.EneState) {
     case ENESTATE_SYNC:
+      //sync
       break;
     case ENESTATE_SHOW_ENETURN:
+      if(/*check animation is ended*/) {
+        if(RecvEnemyCanPut()) {
+          gameState.detail.EneState = ENESTATE_WATING;
+        } else {
+          gameState.detail.EneState = ENESTATE_NONEPUT;
+        }
+      }
       break;
     case ENESTATE_WATING:
+      //recieve stone position of enemy puting
+      RecvEnemyCanPut();
       break;
     case ENESTATE_NONEPUT:
+      //check animation ended
       break;
   }
 }
@@ -119,33 +139,18 @@ void AnimationFinised(GameBroadState broad, GameDetailState detail) {
   gameState.detail = detail;
 }
 
-//Check reverse animation ended
-void CheckAllStoneReversed(GameBroadState broad) {
-  if(CheckAllReverseAnimationEnded()) {
-    switch(broad) {
-      case GAMESTATE_REVERSE_ALLY:
-        gameState.broad = GAMESTATE_ENEMY;
-        gameState.detail.EneState = ENESTATE_SYNC;
-        return;
-      case GAMESTATE_REVERSE_ENEMY:
-        gameState.broad = GAMESTATE_ALLY;
-        gameState.detail.allyState = ALLYSTATE_SYNC;
-        return;
-      default:
-        printf("(%s)Error line:%d\n", __FILE__, __LINE__);
-        exit(1);
-    }
-  }
-}
-
 void WaitingClick() {
   int x, y;
 
-  if(GetMouseClickPos(&x, &y)) {
+  if(GetMouseDown(GLUT_LEFT_BUTTON, &x, &y)) {
     int xx, yy;
 
     if(MousePositionToSquarePosition(x, y, &xx, &yy)) {
-      PutStone(xx, yy, );
+      if(oceloCanPut[y][x]){
+        PutStone(xx, yy, myStoneColor);
+        gameState.broad = GAMESTATE_REVERSE_ALLY;
+        gameState.detail.allyRev = ALLYREV_READY;
+      }
     }
   }
 }
@@ -161,4 +166,28 @@ int MousePositionToSquarePosition(int x, int y, int *xx, int *yy) {
   *yy = y / 70;
 
   return 1;
+}
+
+int RecvEnemyCanPut() {
+  //get info of enemy can put stone
+
+  return 0;
+}
+
+void RecvEnemyPut() {
+  int x, y;
+  OceloStoneColor enemy;
+
+  //recv enemy put pos from server
+
+  switch(myStoneColor) {
+    case STONE_COLOR_BLACK:
+      enemy = STONE_COLOR_WHITE;
+      break;
+    case STONE_COLOR_WHITE:
+      enemy = STONE_COLOR_BLACK;
+      break;
+  }
+
+  PutStone(x, y, enemy);
 }
