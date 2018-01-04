@@ -276,3 +276,16 @@ int CheckAllStoneReversed() {
 
   return 1;
 }
+
+int MousePositionToSquarePosition(int x, int y, int *xx, int *yy) {
+  if(x < 40 || x >= 40 + 70 * OCELO_WIDTH)  return 0;
+  if(y < 40 || y >= 40 + 70 * OCELO_HEIGHT) return 0;
+
+  x = x - 40;
+  y = y - 40;
+
+  *xx = x / 70;
+  *yy = y / 70;
+
+  return 1;
+}
