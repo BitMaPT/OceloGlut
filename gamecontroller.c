@@ -36,9 +36,11 @@ void ControlGameWithState() {
   }
 }
 
-void InitGame() {
+void InitGame(/*specify player stone color in param*/) {
   
   int x, y;
+
+  DeleteAllObject();
 
   for(y = 0; y < OCELO_HEIGHT; y++) {
     for(x = 0; x < OCELO_WIDTH; x++) {
