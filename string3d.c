@@ -1,5 +1,6 @@
 #include<GL/glut.h>
 #include<string.h>
+#include"gamecontroller.h"
 #include"string3d.h"
 #include"object.h"
 
@@ -68,5 +69,6 @@ void StringAnim(String3D *str) {
 
   if(str->anim.stateTime >= 3000) {
     DeleteString(str);
+    FinishStringAnim();
   }
 }

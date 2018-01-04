@@ -3,6 +3,7 @@
 #include"gamecontroller.h"
 #include"stateally.h"
 #include"mouse.h"
+#include"string3d.h"
 #include"oceloboard.h"
 
 void WaitingClick();
@@ -20,6 +21,7 @@ void GameControlWithAllyState() {
         gameState.detail.allyState = ALLYSTATE_WAITING;
       } else {
         //start animation of sign of no possible position to put
+        if(InitString(640 / 2, 480 / 2, "NONE to PUT") == NULL) exit(1);
         gameState.detail.allyState = ALLYSTATE_NONEPUT;
       }
       return;
