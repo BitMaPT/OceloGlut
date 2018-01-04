@@ -56,3 +56,18 @@ void AnimationFinised(GameBroadState broad, GameDetailState detail) {
   gameState.broad = broad;
   gameState.detail = detail;
 }
+
+void FinishStringAnim() {
+  switch(gameState.broad) {
+    case GAMESTATE_ALLY:
+      gameState.broad = GAMESTATE_ENEMY;
+      gameState.detail.EneState = ENESTATE_SYNC;
+      break;
+    case GAMESTATE_ENEMY:
+      gameState.broad = GAMESTATE_ALLY;
+      gameState.detail.allyState = ALLYSTATE_SYNC;
+      break;
+    default:
+      break;
+  }
+}

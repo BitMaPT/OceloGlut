@@ -30,6 +30,7 @@ void InitGame();
 void ControlGameWithState();
 void WaitPutStone();
 void StartTurn();
+void FinishStringAnim();
 
 extern GameState gameState;
 extern OceloStoneColor myStoneColor;
