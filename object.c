@@ -38,8 +38,10 @@ int DrawAllObject() {
 
   objList = head.next;
   while(objList) {
+    glPushMatrix();
     DrawObject(objList->obj);
     objList = objList->next;
+    glPopMatrix();
   }
 
   return 1;

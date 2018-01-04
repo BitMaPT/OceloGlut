@@ -27,6 +27,7 @@ void PutStone(int x, int y, OceloStoneColor mine) {
 
   oceloBoard[y][x] = InitOceloStone(x, y, mine);
 
+
   if(CanPutRight(x, y, mine, enemy)) {
     for(i = x + 1; i < OCELO_WIDTH; i++) {
       if(oceloBoard[y][i]->stone == mine) break;
@@ -269,6 +270,7 @@ int CheckAllStoneReversed() {
 
   for(y = 0; y < OCELO_HEIGHT; y++) {
     for(x = 0; x < OCELO_WIDTH; x++) {
+      if(oceloBoard[y][x] == NULL) continue;
       if(oceloBoard[y][x]->state.state == STONE_STATE_REVERSE_B2W) return 0;
       if(oceloBoard[y][x]->state.state == STONE_STATE_REVERSE_W2B) return 0;
     }

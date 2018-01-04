@@ -1,4 +1,5 @@
 #include<GL/glut.h>
+#include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 #include"putpoint.h"
@@ -54,10 +55,10 @@ void DrawPoint(OceloPoint *point) {
   glTranslated(xx, yy, 0);
   glColor4d(1, 1, 0, point->alpha);
   glBegin(GL_QUADS);
-  glVertex2d(xx - 20, yy - 20);
-  glVertex2d(xx - 20, yy + 20);
-  glVertex2d(xx + 20, yy + 20);
-  glVertex2d(xx + 20, yy - 20);
+  glVertex2d(-20, -20);
+  glVertex2d(-20,  20);
+  glVertex2d( 20,  20);
+  glVertex2d( 20, -20);
   glEnd();
 
   glDisable(GL_BLEND);

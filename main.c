@@ -11,9 +11,6 @@ void Display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
 
-  glLoadIdentity();
-  glOrtho(0, WIDTH, HEIGHT, 0, -300.0, 300.0);
-
   DrawAllObject();
 
   glutSwapBuffers();
@@ -22,17 +19,17 @@ void Display() {
 void Resize(int w, int h) {
   glViewport(0, 0, w, h);
   glLoadIdentity();
-  glOrtho(0, WIDTH, HEIGHT, 0, -1.0, 1.0);
+  glOrtho(0, WIDTH, HEIGHT, 0, -300.0, 300.0);
 }
 
 void Idle() {
-  static int timestd = 1000.0 / 60.0;
+  static int timestd = 1000 / 60;
   int timenow;
 
   timenow = glutGet(GLUT_ELAPSED_TIME);
 
   if(timenow > timestd) {
-    timestd += timestd + (1000 / 60);
+    timestd = timenow + (1000 / 60);
     
     ControlGameWithState();
     UpdateAllObject();

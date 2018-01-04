@@ -18,7 +18,6 @@ void RecvEnemyPut();
 OceloStoneColor myStoneColor;
 GameState gameState;
 ObjectList objectList;
-OceloStoneColor playerColor;
 
 void ControlGameWithState() {
   switch(gameState.broad) {
@@ -38,6 +37,7 @@ void ControlGameWithState() {
 }
 
 void InitGame() {
+  
   int x, y;
 
   for(y = 0; y < OCELO_HEIGHT; y++) {
@@ -47,9 +47,11 @@ void InitGame() {
   }
 
   oceloBoard[3][3] = InitOceloStone(3, 3, STONE_COLOR_BLACK);
-  oceloBoard[3][4] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
-  oceloBoard[4][3] = InitOceloStone(4, 3, STONE_COLOR_WHITE);
+  oceloBoard[3][4] = InitOceloStone(4, 3, STONE_COLOR_WHITE);
+  oceloBoard[4][3] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
+
+  myStoneColor = STONE_COLOR_BLACK;
 
   gameState.broad = GAMESTATE_ALLY;
   gameState.detail.allyState = ALLYSTATE_CHECKING_PUT;

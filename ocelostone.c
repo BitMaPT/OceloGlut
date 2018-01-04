@@ -120,11 +120,12 @@ int DrawStone(Stone *stone) {
   double cx, cy;
 
   if((stone->angle >= 0 && stone->angle < 90.0) || 
-     (stone->angle >= 270.0 && stone->angle < 360.0))     glColor3d(1, 1, 1);
-  if(stone->angle >= 90.0 && stone->angle < 270.0)        glColor3d(0, 0, 0);
+     (stone->angle >= 270.0 && stone->angle < 360.0))     glColor3d(0, 0, 0);
+  if(stone->angle >= 90.0 && stone->angle < 270.0)        glColor3d(1, 1, 1);
   
+  
+  glTranslated((GLdouble)xx, (GLdouble)yy, 0);
   glRotated(stone->angle, 0, 1.0, 0);
-  glTranslated(xx, yy, 0);
   glBegin(GL_POLYGON);
   for(i = 0; i < CIRCLE_VERTEX; i++) {
     cx = 20 * cos(2 * M_PI * ((double)i / CIRCLE_VERTEX));
