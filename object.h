@@ -22,6 +22,8 @@ typedef struct Object {
   ObjectBody object;
 }Object;
 
+typedef struct ObjectList ObjectList;
+
 typedef struct ObjectList {
   Object *obj;
   ObjectList *next;

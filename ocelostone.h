@@ -2,7 +2,6 @@
 #define HEADER_OCELOSTONE
 
 #include<GL/glut.h>
-#include"object.h"
 
 typedef enum OceloStoneColor{
   STONE_COLOR_WHITE,

@@ -19,5 +19,6 @@ typedef struct String3D {
 
 void DrawString(String3D *str);
 String3D* InitString(int x, int y, char *str);
+void UpdateString(String3D *str);
 
 #endif

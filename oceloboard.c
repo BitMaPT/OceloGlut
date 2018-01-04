@@ -3,6 +3,7 @@
 #include"gamecontroller.h"
 #include"oceloboard.h"
 #include"ocelostone.h"
+#include"putpoint.h"
 
 int CanPut(int x, int y, OceloStoneColor stone);
 int CanPutRight(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);

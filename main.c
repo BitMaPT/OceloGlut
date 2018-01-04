@@ -2,6 +2,7 @@
 #include"oceloboard.h"
 #include"gamecontroller.h"
 #include"object.h"
+#include"mouse.h"
 
 #define WIDTH 640
 #define HEIGHT 640
@@ -22,15 +23,6 @@ void Resize(int w, int h) {
   glViewport(0, 0, w, h);
   glLoadIdentity();
   glOrtho(0, WIDTH, HEIGHT, 0, -1.0, 1.0);
-}
-
-void Mouse(int button, int state, int x, int y) {
-  switch(button) {
-    case GLUT_LEFT_BUTTON:
-      break;
-    default:
-      break;
-  }
 }
 
 void Idle() {
