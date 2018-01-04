@@ -5,34 +5,39 @@
 
 int DrawObject(Object *obj);
 int UpdateObject(Object *obj);
+int DeleteObjectList(ObjectList *list);
+
+static ObjectList *last;
+static ObjectList head;
 
 static ObjectList list;
 
 int ObjectListInit() {
-  list.list = (Object**)malloc(sizeof(Object*) * 10);
-  if(list.list == NULL) return 0;
-
-  list.length = 0;
-  list.max = 10;
-
+  head.obj = NULL;
+  head.next = NULL;
+  last = NULL;
   return 1;
 }
 
 int UpdateAllObject() {
-  int i;
+  ObjectList *objList;
 
-  for(i = 0; i < list.length; i++) {
-    UpdateObject(list.list[i]);
+  objList = head.next;
+  while(objList) {
+    UpdateObject(objList->obj);
+    objList = objList->next;
   }
 
   return 1;
 }
 
 int DrawAllObject() {
-  int i;
+  ObjectList *objList;
 
-  for(i = 0; i < list.length; i++) {
-    DrawObject(list.list[i]);
+  objList = head.next;
+  while(objList) {
+    DrawObject(objList->obj);
+    objList = objList->next;
   }
 
   return 1;
@@ -71,73 +76,115 @@ int UpdateObject(Object *obj) {
 }
 
 int AddObject(Object *obj) {
-  if(list.length == list.max) {
-    list.max *= 2;
-    list.list = (Object**)malloc(sizeof(Object*) * list.max);
-    if(list.list == NULL) return 0;
-  }
+  ObjectList *list;
 
-  list.list[list.length] = obj;
-  list.length++;
+  list = (ObjectList*)malloc(sizeof(ObjectList));
+  if(list == NULL) return 0;
+
+  list->next = NULL;
+  list->obj = obj;
+
+  if(head.next == NULL) {
+    head.next = list;
+  }
+  if(last != NULL) {
+    last->next = list;
+  }
+  last = list;
 
   return 1;
 }
 
 int DeleteAllObject() {
-  int i;
+  ObjectList *list;
+  ObjectList *temp;
 
-  for(i = 0; i < list.length; i++) {
-    free(list.list[i]);
+  list = head.next;
+  while(list) {
+    temp = list->next;
+    DeleteObjectList(list);
+    list = temp;  
   }
-  free(list.list);
 
   return ObjectListInit();
 }
 
 int DeleteSelectedTypeObject(ObjectType type) {
-  int i, j;
-  int *deleteList;
-  ObjectList oldList;
-  ObjectList newList;
+  ObjectList *list, *before;
 
-  newList.list = (Object**)malloc(sizeof(Object*) * oldList.max);
-  newList.max = oldList.max;
-  if(newList.list == NULL) return 0;
+  list = head.next;
+  before = &head;
 
-  oldList = list;
-
-  for(i = 0; i < list.length; i++) {
-    if(oldList.list[i]->type == type) {
-      switch(type) {
-        case OBJECT_OCELO_STONE:
-          free(oldList.list[i]->object.stone);
-          break;
-        case OBJECT_SELECTABLE_POINT:
-          free(oldList.list[i]->object.point);
-          break;
+  while(list) {
+    if(list->obj->type == type) {
+      before->next = list->next;
+      if(list == last) {
+        last = before;
       }
+      DeleteObjectList(list);
+      list = before->next;
       continue;
     }
 
-    newList.list[j++] = oldList.list[i];
+    before = list;
+    list = list->next;
   }
-
-  newList.length = oldList.length - j;
-  free(oldList.list);
-  list = newList;
 
   return 1;
 }
 
 int CheckAllReverseAnimationEnded() {
-  int i;
+  ObjectList *list;
 
-  for(i = 0; i < list.length; i++) {
-    if(list.list[i]->type == OBJECT_OCELO_STONE) {
-      if(list.list[i]->object.stone->state.state == STONE_STATE_REVERSE_B2W) return 0;
-      if(list.list[i]->object.stone->state.state == STONE_STATE_REVERSE_W2B) return 0;
+  list = head.next;
+  while(list) {
+    if(list->obj->type == OBJECT_OCELO_STONE) {
+      switch(list->obj->object.stone->state.state) {
+        case STONE_STATE_REVERSE_B2W: return 0;
+        case STONE_STATE_REVERSE_W2B: return 0;
+        default: break;
+      }
     }
   }
 
+  return 1;
+}
+
+int DeleteObject(Object *obj) {
+  ObjectList *list, *before;
+
+  list = head.next;
+  before = &head;
+  while(list) {
+    if(list->obj == obj) {
+      before->next = list->next;
+      if(list == last) {
+        last = before;
+      }
+      DeleteObjectList(list);
+      list = before->next;
+      continue;
+    }
+
+    before = list;
+    list = list->next;
+  }
+}
+
+int DeleteObjectList(ObjectList *list) {
+  switch(list->obj->type) {
+    case OBJECT_OCELO_STONE:
+      free(list->obj->object.stone);
+      break;
+    case OBJECT_SELECTABLE_POINT:
+      free(list->obj->object.point);
+      break;
+    case OBJECT_STRING:
+      free(list->obj->object.string);
+      break;
+  }
+
+  free(list->obj);
+  free(list);
   return 1;
 }

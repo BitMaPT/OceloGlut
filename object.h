@@ -23,9 +23,8 @@ typedef struct Object {
 }Object;
 
 typedef struct ObjectList {
-  Object **list;
-  int length;
-  int max;
+  Object *obj;
+  ObjectList *next;
 }ObjectList;
 
 int DrawAllObject();
