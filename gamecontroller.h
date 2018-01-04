@@ -2,6 +2,10 @@
 #define HEADER_GAMECONTROLLER
 
 #include"ocelostone.h"
+#include"stateally.h"
+#include"stateallyrev.h"
+#include"stateene.h"
+#include"stateenerev.h"
 
 typedef enum GameBroadState {
   GAMESTATE_ALLY,
@@ -9,31 +13,6 @@ typedef enum GameBroadState {
   GAMESTATE_REVERSE_ALLY,
   GAMESTATE_REVERSE_ENEMY
 }GameBroadState;
-
-typedef enum AllyState {
-  ALLYSTATE_SYNC,
-  ALLYSTATE_SHOW_YOURTURN,
-  ALLYSTATE_CHECKING_PUT,
-  ALLYSTATE_WAITING,
-  ALLYSTATE_NONEPUT
-}AllyState;
-
-typedef enum AllyReverse {
-  ALLYREV_READY,
-  ALLYREV_ANIMATION
-}AllyReverse;
-
-typedef enum EnemyState {
-  ENESTATE_SYNC,
-  ENESTATE_SHOW_ENETURN,
-  ENESTATE_WATING,
-  ENESTATE_NONEPUT
-}EnemyState;
-
-typedef enum EnemyReverse {
-  ENEREV_READY,
-  ENEREV_ANIMATION
-}EnemyReverse;
 
 typedef union GameDetailState {
   AllyState allyState;
@@ -48,14 +27,11 @@ typedef struct GameState {
 }GameState;
 
 void InitGame();
+void ControlGameWithState();
 void WaitPutStone();
 void StartTurn();
-void ClickBoard();
-void RenewStatus();
-void ExchangeTurn();
 
-void ControlGameWithAllyState();
-void GameControlWithAllyRevState();
-
+extern GameState gameState;
+extern OceloStoneColor myStoneColor;
 
 #endif
