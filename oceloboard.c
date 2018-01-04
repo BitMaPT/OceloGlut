@@ -16,6 +16,7 @@ int CanPutBelowLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
 
 Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
+Stone **oceloReverseStones;
 
 void PutStone(int x, int y, OceloStoneColor mine) {
   int i;
@@ -121,6 +122,8 @@ int CheckAllSquaresToPut(OceloStoneColor stone) {
 int CanPut(int x, int y, OceloStoneColor mine) {
   int i;
   OceloStoneColor enemy;
+
+  if(oceloBoard[y][x] != NULL) return 0;
 
   if(mine == STONE_COLOR_WHITE) enemy = STONE_COLOR_BLACK;
   if(mine == STONE_COLOR_BLACK) enemy = STONE_COLOR_WHITE;
@@ -259,4 +262,17 @@ int CanPutBelowLeft(int x, int y, OceloStoneColor mine, OceloStoneColor enemy) {
   } 
 
   return 0;
+}
+
+int CheckAllStoneReversed() {
+  int x, y;
+
+  for(y = 0; y < OCELO_HEIGHT; y++) {
+    for(x = 0; x < OCELO_WIDTH; x++) {
+      if(oceloBoard[y][x]->state.state == STONE_STATE_REVERSE_B2W) return 0;
+      if(oceloBoard[y][x]->state.state == STONE_STATE_REVERSE_W2B) return 0;
+    }
+  }
+
+  return 1;
 }
