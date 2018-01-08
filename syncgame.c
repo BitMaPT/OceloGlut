@@ -8,7 +8,6 @@
 #include<unistd.h>
 #include"syncheader.h"
 
-int SendPutPoint(int x, int y);
 void StoreIntHtoN(char *buf, int num);
 void GetIntNtoH(char *buf, int *num);
 
@@ -89,11 +88,11 @@ int RecvPutPoint(int *x, int *y) {
       case 2:
         GetIntNtoH(buf + 1, x);
         GetIntNtoH(buf + 5, y);
-        break;
+        return 1;
     }
   }
 
-  return 1;
+  return 0;
 }
 
 int RecvStartGame() {
