@@ -6,7 +6,7 @@
 #include<netinet/in.h>
 #include<netdb.h>
 #include<unistd.h>
-#include"syncheader.h"
+#include"syncgame.h"
 
 void StoreIntHtoN(char *buf, int num);
 void GetIntNtoH(char *buf, int *num);

@@ -1,8 +1,8 @@
 #include<GL/glut.h>
 #include"oceloboard.h"
-#include"gamecontroller.h"
 #include"object.h"
 #include"mouse.h"
+#include"scenemanager.h"
 
 #define WIDTH 640
 #define HEIGHT 640
@@ -40,7 +40,6 @@ void Idle() {
 
 void init() {
   glClearColor(0, 0.7, 0, 1);
-  InitGame();
 }
 
 int main(int argc, char **argv) {
@@ -54,6 +53,7 @@ int main(int argc, char **argv) {
   glutMouseFunc(Mouse);
   glutIdleFunc(Idle);
   init();
+  InitSceneManager(argc, argv);
 
   glutMainLoop();
 

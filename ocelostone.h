@@ -4,7 +4,7 @@
 #include<GL/glut.h>
 
 typedef enum OceloStoneColor{
-  STONE_COLOR_WHITE,
+  STONE_COLOR_WHITE = 1,
   STONE_COLOR_BLACK
 }OceloStoneColor;
 

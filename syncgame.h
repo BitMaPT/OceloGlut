@@ -1,7 +1,18 @@
 #ifndef HEADER_SYNCGAME
 #define HEADER_SYNCGAME
 
-#include"syncheader.h"
+#define SYNC_BUF_SIZE 32
+
+typedef enum {
+  SYNC_OPPONENT_LOST = 1,
+  SYNC_READY_NEXTTURN,
+  SYNC_GAMESTART,
+  SYNC_POSITION,
+  SYNC_WAITPUT,
+  SYNC_NO_POSITION,
+  SYNC_ENDGAME,
+  SYNC_INITGAME_READY
+}SyncHeader;
 
 int SendGameEnd();
 int SendNoPositionToPut();
@@ -14,5 +25,7 @@ int RecvPutPoint(int *x, int *y);
 int RecvStartGame();
 int RecvSignalFromServer();
 int SendSignalToServer(SyncHeader header);
+
+extern int clientSockfd;
 
 #endif

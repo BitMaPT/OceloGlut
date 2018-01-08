@@ -5,9 +5,12 @@
 #include<sys/types.h>
 #include<unistd.h>
 #include<netdb.h>
+#include"scenemanager.h"
+#include"gamecontroller.h"
 #include"ocelostone.h"
 #include"syncgame.h"
 #include"findopponent.h"
+#include"object.h"
 
 int InitSocket(char *name, char *service);
 int WaitForOpponent();
@@ -19,18 +22,34 @@ int FindOpponentScene(char *name, char *service) {
 
   switch(findopponent_state){
     case FINDOPPONENT_INIT:
+      DeleteAllObject();
       if(InitSocket(name, service)) {
         findopponent_state = FINDOPPONENT_SEARCH;
-        return;
+        return 0;
       } else {
         exit(1);
       }
     case FINDOPPONENT_SEARCH:
       retval = WaitForOpponent();
-      if(retval == 0) return;
+      if(retval == 0) return 0;
       if(retval == -1) exit(1);
-      //scene change
+      
+      switch(retval) {
+        case STONE_COLOR_BLACK:
+          myStoneColor = STONE_COLOR_BLACK;
+          enemyStoneColor = STONE_COLOR_WHITE;
+          isFirstPlayer = 1;
+          break;
+        case STONE_COLOR_WHITE:
+          myStoneColor = STONE_COLOR_WHITE;
+          enemyStoneColor = STONE_COLOR_BLACK;
+          isFirstPlayer = 0;
+          break;
+      }
+      break;
   }
+
+  return 1;
 }
 
 int InitSocket(char *name, char *service) {

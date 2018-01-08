@@ -4,6 +4,7 @@
 #include"scenemanager.h"
 #include"findopponent.h"
 #include"gamecontroller.h"
+#include"ocelostone.h"
 
 Scene sceneStatus;
 char *serverName;

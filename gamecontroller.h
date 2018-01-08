@@ -8,6 +8,7 @@
 #include"stateenerev.h"
 
 typedef enum GameBroadState {
+  GAMESTATE_INIT = 1,
   GAMESTATE_ALLY,
   GAMESTATE_ENEMY,
   GAMESTATE_REVERSE_ALLY,
@@ -27,7 +28,7 @@ typedef struct GameState {
 }GameState;
 
 void InitGame();
-void ControlGameWithState();
+int ControlGameWithState();
 void WaitPutStone();
 void StartTurn();
 void FinishStringAnim();
@@ -35,5 +36,6 @@ void FinishStringAnim();
 extern GameState gameState;
 extern OceloStoneColor myStoneColor;
 extern OceloStoneColor enemyStoneColor;
+extern int isFirstPlayer;
 
 #endif

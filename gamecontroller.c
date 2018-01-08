@@ -6,6 +6,7 @@
 #include"gamecontroller.h"
 #include"mouse.h"
 #include"stateally.h"
+#include"syncgame.h"
 
 void WaitingClick();
 void GameControlWithAllyRevState();
@@ -17,27 +18,33 @@ void RecvEnemyPut();
 
 OceloStoneColor myStoneColor;
 OceloStoneColor enemyStoneColor;
+int isFirstPlayer;
 GameState gameState;
 ObjectList objectList;
 
-void ControlGameWithState() {
+int ControlGameWithState() {
   switch(gameState.broad) {
+    case GAMESTATE_INIT:
+      InitGame();
+      break;
     case GAMESTATE_ALLY:
       GameControlWithAllyState();
-      return;
+      break;
     case GAMESTATE_REVERSE_ALLY:
       GameControlWithAllyRevState();
-      return;
+      break;
     case GAMESTATE_ENEMY:
       GameControlWithEnemyState();
-      return;
+      break;
     case GAMESTATE_REVERSE_ENEMY:
       GameControlWithEnemyRevState();
-      return;
+      break;;
   }
+
+  return 0;
 }
 
-void InitGame(OceloStoneColor stoneColor) {
+void InitGame() {
   
   int x, y;
 
@@ -54,18 +61,15 @@ void InitGame(OceloStoneColor stoneColor) {
   oceloBoard[4][3] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
 
-  myStoneColor = stoneColor;
-  switch(myStoneColor) {
-    case STONE_COLOR_BLACK:
-      enemyStoneColor = STONE_COLOR_WHITE;
-      break;
-    case STONE_COLOR_WHITE:
-      enemyStoneColor = STONE_COLOR_BLACK;
-      break;
+  if(isFirstPlayer) {
+    gameState.broad = GAMESTATE_ALLY;
+    gameState.detail.allyState = ALLYSTATE_SYNC;
+    SendSignalToServer(SYNC_READY_NEXTTURN);
+  } else {
+    gameState.broad = GAMESTATE_ENEMY;
+    gameState.detail.EneState = ENESTATE_SYNC;
+    SendSignalToServer(SYNC_READY_NEXTTURN);
   }
-
-  gameState.broad = GAMESTATE_ALLY;
-  gameState.detail.allyState = ALLYSTATE_CHECKING_PUT;
 }
 
 void AnimationFinised(GameBroadState broad, GameDetailState detail) {
