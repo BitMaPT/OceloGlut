@@ -5,6 +5,8 @@
 #include<sys/types.h>
 #include<netinet/in.h>
 #include<netdb.h>
+#include<unistd.h>
+#include"syncheader.h"
 
 int SendPutPoint(int x, int y);
 void StoreIntHtoN(char *buf, int num);
@@ -13,11 +15,33 @@ void GetIntNtoH(char *buf, int *num);
 int clientSockfd;
 
 int SendNoPositionToPut() {
-  
+  char buf[SYNC_BUF_SIZE];
+
+  buf[0] = (char)SYNC_NO_POSITION;
+  if(send(clientSockfd, buf, sizeof(buf), 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("send");
+    return 0;
+  }
+
+  return 1;
+}
+
+int SendGameEnd() {
+  char buf[SYNC_BUF_SIZE];
+
+  buf[0] = (char)SYNC_ENDGAME;
+  if(send(clientSockfd, buf, sizeof(buf), 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("send");
+    return 0;
+  }
+
+  return 1;
 }
 
 int SendPutPoint(int x, int y) {
-  char buf[9];
+  char buf[SYNC_BUF_SIZE];
 
   buf[0] = 1;
   StoreIntHtoN(buf + 1, x);
@@ -46,7 +70,7 @@ int RecvPutPoint(int *x, int *y) {
     perror("select");
     return -1;
   } else if(retval) {
-    char buf[9];
+    char buf[SYNC_BUF_SIZE];
     ssize_t size;
 
     size = recv(clientSockfd, buf, sizeof(buf), 0);
@@ -68,6 +92,48 @@ int RecvPutPoint(int *x, int *y) {
         break;
     }
   }
+
+  return 1;
+}
+
+int RecvStartGame() {
+  fd_set readfd;
+  struct timeval tval = {0, 0};
+  int retval;
+
+  FD_ZERO(&readfd);
+  FD_SET(clientSockfd, &readfd);
+  retval = select(clientSockfd + 1, &readfd, NULL, NULL, &tval);
+  if(retval < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("recv");
+    return -1;
+  } else if(retval) {
+    ssize_t size;
+    char buf[SYNC_BUF_SIZE];
+    size = recv(clientSockfd, buf, sizeof(buf), 0);
+    
+    if(size < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("recv");
+      close(clientSockfd);
+      return -1;
+    } else if(size == 0) {
+      fprintf(stderr, "%s, line:%d server is closed\n", __FILE__, __LINE__);
+      close(clientSockfd);
+      return -1;
+    }
+
+    switch(buf[0]) {
+      case (char)SYNC_GAMESTART:
+        return 1;
+      default:
+        fprintf(stderr, "%s line:%d invalid header type(%d)\n", __FILE__, __LINE__, buf[0]);
+        return -1;
+    }
+  }
+
+  return 0;
 }
 
 void StoreIntHtoN(char *buf, int num) {
