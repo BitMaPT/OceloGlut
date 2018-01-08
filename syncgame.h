@@ -1,0 +1,4 @@
+#ifndef HEADER_SYNCGAME
+#define HEADER_SYNCGAME
+
+#endif
