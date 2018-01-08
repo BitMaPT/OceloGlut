@@ -5,7 +5,8 @@
     "oceloboard.h": "c",
     "glut.h": "c",
     "gamecontroller.h": "c",
-    "object.h": "c"
+    "object.h": "c",
+    "syncgame.h": "c"
   },
   "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

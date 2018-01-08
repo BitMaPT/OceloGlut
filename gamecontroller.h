@@ -34,5 +34,6 @@ void FinishStringAnim();
 
 extern GameState gameState;
 extern OceloStoneColor myStoneColor;
+extern OceloStoneColor enemyStoneColor;
 
 #endif

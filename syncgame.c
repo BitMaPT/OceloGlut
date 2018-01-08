@@ -138,6 +138,57 @@ int RecvStartGame() {
   return 0;
 }
 
+int RecvSignalFromServer() {
+  fd_set readfd;
+  struct timeval tval;
+  int retval;
+
+  FD_ZERO(&readfd);
+  FD_SET(clientSockfd, &readfd);
+  
+  retval = select(clientSockfd + 1, &readfd, NULL, NULL, &tval);
+  if(retval < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("select");
+    close(clientSockfd);
+    return -1;
+  } else if(retval) {
+    char buf[SYNC_BUF_SIZE];
+    ssize_t size;
+
+    size = recv(clientSockfd, buf, SYNC_BUF_SIZE, 0);
+    if(size < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("select");
+      close(clientSockfd);
+      return -1;
+    } else if(size == 0) {
+      fprintf(stderr, "server is closed\n");
+      close(clientSockfd);
+      return -1;
+    }
+
+    return buf[0];
+  }
+  
+  return 0;
+}
+
+int SendSignalToServer(SyncHeader header) {
+  char buf[SYNC_BUF_SIZE];
+
+  buf[0] = header;
+
+  if(send(clientSockfd, buf, sizeof(buf), 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("select");
+    close(clientSockfd);
+    return 0;
+  }
+
+  return 1;
+}
+
 void StoreIntHtoN(char *buf, int num) {
   int netnum, i;
 

@@ -1,46 +1,101 @@
+#include<stdio.h>
 #include<stdlib.h>
+#include<unistd.h>
 #include"gamecontroller.h"
 #include"stateene.h"
 #include"oceloboard.h"
+#include"syncgame.h"
 
-int RecvEnemyCanPut();
+static void RecvSyncInfo();
+static void RecvReadyInfo();
+void RecvEnemyCanPut();
 void RecvEnemyPut();
 
 void GameControlWithEnemyState() {
   switch(gameState.detail.EneState) {
     case ENESTATE_SYNC:
-      //sync
+      RecvSyncInfo();
+      break;
+    case ENESTATE_WAITCHECK:
+      RecvReadyInfo();
       break;
     case ENESTATE_WATING:
       //recieve stone position of enemy puting
-      RecvEnemyCanPut();
+      RecvEnemyPut();
+      break;
+    case ENESTATE_REVERSE:
+      if(CheckAllStoneReversed()) {
+        gameState.broad = GAMESTATE_ALLY;
+        gameState.detail.allyState = ALLYSTATE_CHECKING_PUT;
+        if(SendSignalToServer(SYNC_READY_NEXTTURN) == 0) {
+          exit(1);
+        }
+      }
       break;
     case ENESTATE_NONEPUT:
-      //check animation ended
+      if(1/*end animation*/) {
+        gameState.broad = GAMESTATE_ALLY;
+        gameState.detail.allyState = ALLYSTATE_CHECKING_PUT;
+        if(SendSignalToServer(SYNC_READY_NEXTTURN) == 0) {
+          exit(1);
+        }
+      }
       break;
   }
-}
-
-int RecvEnemyCanPut() {
-  //get info of enemy can put stone
-
-  return 0;
 }
 
 void RecvEnemyPut() {
-  int x, y;
-  OceloStoneColor enemy;
+  int x, y, retval;
+  //get info of enemy can put stone
 
-  //recv enemy put pos from server
+  retval = RecvPutPoint(&x, &y);
 
-  switch(myStoneColor) {
-    case STONE_COLOR_BLACK:
-      enemy = STONE_COLOR_WHITE;
-      break;
-    case STONE_COLOR_WHITE:
-      enemy = STONE_COLOR_BLACK;
-      break;
+  if(retval == -1) {
+    //error occured
+    exit(1);
+  } else if(retval) {
+    PutStone(x, y, enemyStoneColor);
+    gameState.detail.EneState = ENESTATE_REVERSE;
   }
+}
 
-  PutStone(x, y, enemy);
+static void RecvSyncInfo() {
+  int header;
+
+  header = RecvSignalFromServer();
+  if(header == 0) return;
+  if(header == -1) {
+    exit(1);
+  }
+  switch((SyncHeader)header) {
+    case SYNC_READY_NEXTTURN:
+      gameState.detail.EneState = ENESTATE_WAITCHECK;
+      return;
+    default:
+      fprintf(stderr, "invalid header\n");
+      exit(1);
+  }
+}
+
+static void RecvReadyInfo() {
+  int retval;
+
+  retval = RecvSignalFromServer();
+  if(retval == 0) return;
+  if(retval == -1) exit(1);
+  switch((SyncHeader)retval) {
+    case SYNC_WAITPUT:
+      gameState.detail.EneState = ENESTATE_WATING;
+      return;
+    case SYNC_NO_POSITION:
+      gameState.detail.EneState = ENESTATE_NONEPUT;
+      return;
+    case SYNC_ENDGAME:
+      gameState.broad;//end game;
+      gameState.detail; 
+      return;
+    default:
+      fprintf(stderr, "%s line:%d fatal error\n", __FILE__, __LINE__);
+      exit(1);
+  }
 }

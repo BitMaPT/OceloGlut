@@ -16,6 +16,7 @@ int RecvEnemyCanPut();
 void RecvEnemyPut();
 
 OceloStoneColor myStoneColor;
+OceloStoneColor enemyStoneColor;
 GameState gameState;
 ObjectList objectList;
 
@@ -36,7 +37,7 @@ void ControlGameWithState() {
   }
 }
 
-void InitGame(/*specify player stone color in param*/) {
+void InitGame(OceloStoneColor stoneColor) {
   
   int x, y;
 
@@ -53,7 +54,15 @@ void InitGame(/*specify player stone color in param*/) {
   oceloBoard[4][3] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
 
-  myStoneColor = STONE_COLOR_BLACK;
+  myStoneColor = stoneColor;
+  switch(myStoneColor) {
+    case STONE_COLOR_BLACK:
+      enemyStoneColor = STONE_COLOR_WHITE;
+      break;
+    case STONE_COLOR_WHITE:
+      enemyStoneColor = STONE_COLOR_BLACK;
+      break;
+  }
 
   gameState.broad = GAMESTATE_ALLY;
   gameState.detail.allyState = ALLYSTATE_CHECKING_PUT;

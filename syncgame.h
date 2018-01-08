@@ -1,6 +1,8 @@
 #ifndef HEADER_SYNCGAME
 #define HEADER_SYNCGAME
 
+#include"syncheader.h"
+
 int SendGameEnd();
 int SendNoPositionToPut();
 
@@ -10,5 +12,7 @@ int SendNoPositionToPut();
 int SendPutPoint(int x, int y);
 int RecvPutPoint(int *x, int *y);
 int RecvStartGame();
+int RecvSignalFromServer();
+int SendSignalToServer(SyncHeader header);
 
 #endif
