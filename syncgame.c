@@ -39,6 +39,9 @@ int SendGameEnd() {
   return 1;
 }
 
+//retval:
+//0=> error occured
+//1=> there is no problem
 int SendPutPoint(int x, int y) {
   char buf[SYNC_BUF_SIZE];
 
