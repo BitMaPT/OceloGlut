@@ -7,6 +7,7 @@
 #include"server.h"
 #include"syncgame.h"
 #include"ocelostone.h"
+#include"oceloboard.h"
 
 typedef enum {
   SERVER_WAIT_SYNC,
@@ -41,6 +42,8 @@ int main(int argc, char **argv) {
 
     maxfd = sockfds[0] > sockfds[1] ? sockfds[0] : sockfds[1];
 
+
+
     buf[0] = SYNC_GAMESTART;
     buf[1] = STONE_COLOR_BLACK;
     if(send(sockfds[0], buf, sizeof(buf), 0) < 0) {
@@ -61,6 +64,136 @@ int main(int argc, char **argv) {
     }
   }
 }
+
+int SendSignalToAllClient(SyncHeader header) {
+  char buf[SYNC_BUF_SIZE];
+  int i;
+
+  buf[0] = (char)header;
+  for(i = 0; i < 2; i++) {
+    if(send(sockfds[i], buf, SYNC_BUF_SIZE, 0) < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("send");
+      return 0;
+    }
+  }
+  
+  return 1;
+}
+
+int SendPutPosition(int sockfd, int x, int y) {
+  char buf[SYNC_BUF_SIZE];
+
+  buf[0] = ; //store header of put position
+  buf[1] = (char)x;
+  buf[2] = (char)y;
+
+  if(send(sockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("send");
+    return 0;
+  }
+
+  return 1;
+}
+
+int RecvPutPosition(int sockfd) {
+  char buf[SYNC_BUF_SIZE];
+  int sendSockfd;
+  ssize_t size;
+  
+  size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
+  if(size == 0) {
+    //connection lost
+  } else if(size < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("recv");
+    return 0;
+  }
+
+  sendSockfd = (sockfd == sockfds[0]) ? sockfds[0] : sockfds[1];
+  if(!SendPutPosition(sendSockfd, buf[1], buf[2])) return 0;
+  
+  return 1;
+}
+
+int SendPutablePosition(int sockfd, int *list, size_t size) {
+  char buf[SYNC_BUF_SIZE];
+  int i;
+
+  buf[0] = ;//store header of put position info
+  for(i = 0; i < size; i++) {
+    buf[i + 1] = (char)list[i];
+  }
+
+  if(send(sockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("send");
+    return 0;
+  }
+
+  return 1;
+}
+
+//recieve syncronise signal from two clients
+int RecvSyncSignal() {
+  int i, j, retval, maxfd;
+  int sockfd;
+  fd_set readfds;
+
+  FD_ZERO(&readfds);
+  for(i = 0; i < 2; i++) {
+    FD_SET(sockfds[i], &readfds);
+  }
+
+  maxfd = (sockfds[0] > sockfds[1]) ? sockfds[0] : sockfds[1];
+  retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
+  
+  if(retval <= 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("select");
+    return 0;
+  } else {
+    //recive signal from client
+    for(i = 0; i < 2; i++) {
+      if(FD_ISSET(sockfds[i], &readfds)) {
+        ssize_t size;
+        char buf[SYNC_BUF_SIZE];
+
+        //not selected socket file discripter is stored to sockfd
+        switch(i) {
+          case 0: sockfd = sockfds[1]; break;
+          case 1: sockfd = sockfds[0]; break;
+        }
+
+        size = recv(sockfds[i], buf, SYNC_BUF_SIZE, 0);
+        if(size == 0) {
+          //connection lost
+          return 0;
+        } else if(size < 0) {
+          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+          perror("recv");
+          return 0;
+        }
+
+        size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
+        if(size == 0) {
+          //connection lost
+          return 0;
+        } else if(size < 0) {
+          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+          perror("recv");
+          return 0;
+        }
+        
+        break;
+      }
+    }
+  }
+
+  return 1;
+}
+
 
 int ServerControlState() {
   switch(status) {
@@ -217,37 +350,19 @@ int WaitPutPos() {
 }
 
 int WaitForTwoPlayers(int l_sockfd, struct sockaddr_in sa) {
-  struct timeval tval = {0, 0};
-  fd_set readfds;
+  int newSockfd;
+  socklen_t saSize = sizeof(sa);
   int retval, count = 0;
   char buf[1];
 
   while(count < 2) {
-    FD_ZERO(&readfds);
-    FD_SET(l_sockfd, &readfds);
-    
-    retval = select(l_sockfd + 1, &readfds, NULL, NULL, NULL);
-    
-    if(retval < 0) {
+    newSockfd = accept(l_sockfd, (struct sockaddr*)&sa, &saSize);
+    if(newSockfd < 0) {
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-      perror("select");
-      return 0;
-
-      //accept is ready
-    } else if (retval) {
-      int new_sockfd;
-      socklen_t size;
-      ssize_t recv_size;
-
-      size = sizeof(sa);
-      new_sockfd = accept(l_sockfd, (struct sockaddr*)&sa, &size);
-      if(new_sockfd < 0) {
-        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-        perror("accept");
-        return 0;
-      }
-
-      sockfds[count++] = new_sockfd;
+      perror("accept");
+    } else {
+      //valid file discriptor
+      sockfds[count++] = newSockfd;
     }
   }
 
