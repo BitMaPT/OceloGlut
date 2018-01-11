@@ -176,12 +176,10 @@ int GetPutablePosition() {
 }
 
 int DetermineNextRoutine(char *buf) {
-  switch((SyncHeader)buf[1]) {
-    case SYNC_MYTURN:
-      gameState = GAMESTATE_WAIT_MYPUT;
-      return 1;
-    case SYNC_OPTURN:
-      gameState = GAMESTATE_WAIT_OPPUT;
+  switch((SyncHeader)buf[0]) {
+    case SYNC_PUTABLEPOS:
+      if((OceloStoneColor)buf[1] == myStoneColor)    gameState = GAMESTATE_WAIT_MYPUT;
+      if((OceloStoneColor)buf[1] == enemyStoneColor) gameState = GAMESTATE_WAIT_OPPUT;
       return 1;
     case SYNC_GAMEOVER:
       GameOver();
