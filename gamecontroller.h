@@ -17,11 +17,8 @@ typedef enum GameState {
   GAMESTATE_REVERSE
 }GameState;
 
-void InitGame();
 int ControlGameWithState();
-void WaitPutStone();
-void StartTurn();
-void FinishStringAnim();
+int SetSocket(char **argv);
 
 extern GameState gameState;
 extern OceloStoneColor myStoneColor;

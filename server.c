@@ -57,6 +57,16 @@ int main(int argc, char **argv) {
   sa.sin_addr.s_addr = INADDR_ANY;
 
   l_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+  {
+    int yes = 1;
+    if(setsockopt(l_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("setsockopt");
+      return 1;
+    }
+  }
+
   if(bind(l_sockfd, (struct sockaddr*)&sa, sizeof(sa)) < 0) {
     fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
     perror("bind");

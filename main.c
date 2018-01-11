@@ -1,3 +1,5 @@
+#include<stdio.h>
+#include<stdlib.h>
 #include<GL/glut.h>
 #include"oceloboard.h"
 #include"object.h"
@@ -38,11 +40,17 @@ void Idle() {
   }
 }
 
-void init() {
+void init(int argc, char **argv) {
   glClearColor(0, 0.7, 0, 1);
+  SetSocket(argv);
 }
 
 int main(int argc, char **argv) {
+  if(argc < 3) {
+    fprintf(stderr, "write host and port\n");
+    exit(1);
+  }
+
   glutInit(&argc, argv);
   glutInitWindowSize(WIDTH, HEIGHT);
   glutInitWindowPosition(100, 100);
@@ -52,7 +60,7 @@ int main(int argc, char **argv) {
   glutReshapeFunc(Resize);
   glutMouseFunc(Mouse);
   glutIdleFunc(Idle);
-  init();
+  init(argc, argv);
   InitSceneManager(argc, argv);
 
   glutMainLoop();

@@ -3,6 +3,7 @@
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<unistd.h>
+#include<netdb.h>
 #include<errno.h>
 #include"object.h"
 #include"oceloboard.h"
@@ -57,6 +58,39 @@ int ControlGameWithState() {
   return 0;
 }
 
+int SetSocket(char **argv) {
+  int sockfd, retval;
+  struct addrinfo stdinfo;
+  struct addrinfo *result, *rp;
+  
+  retval = getaddrinfo(argv[1], argv[2], &stdinfo, &result)
+  if(retval != 0) {
+    fprintf(stderr, "%s line:%d getaddrinfo: ", __FILE__, __LINE__);
+    gai_strerror(retval);
+    return 0;
+  }
+
+  for(rp = result; rp != NULL; rp = rp->ai_next) {
+    sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+    
+    if(sockfd < 0) continue;
+    if(connect(sockfd, rp->ai_addr, rp->ai_addrlen) == 0) break;
+
+    close(sockfd);
+  }
+
+  if(rp == NULL) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("socket or connect");
+    return 0;
+  }
+  
+  freeaddrinfo(result);
+  clientSockfd = sockfd;
+
+  return 1;
+}
+
 void InitGame() {
   
   int x, y;
@@ -106,7 +140,7 @@ int RecvMyStoneColor() {
         enemyStoneColor = STONE_COLOR_BLACK;
         break;
     }
-    
+
     InitGame();
     gameState = GAMESTATE_SEND_SIGNAL;
   }
@@ -213,7 +247,7 @@ int SendPutPosition(int x, int y) {
   } else if(retval) {
     char buf[SYNC_BUF_SIZE];
 
-    buf[0] = SYNC_SENDPOS;//header of send position
+    buf[0] = (char)SYNC_PUTPOSITION;//header of send position
     buf[1] = (char)x;
     buf[2] = (char)y;
     if(send(clientSockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
