@@ -18,6 +18,7 @@ int GetPutablePosition();
 int RecvPutPosition();
 int SendPutPosition(int x, int y);
 int GameOver();
+int DetermineNextRoutine(char *buf);
 
 OceloStoneColor myStoneColor;
 OceloStoneColor enemyStoneColor;
@@ -90,6 +91,7 @@ int RecvMyStoneColor() {
   } else if(size == 0) {
     //TODO
     //connection lost
+    fprintf(stderr, "%s line:%d connection lost\n", __FILE__, __LINE__);
     exit(1);
     return 0;
   } else {
@@ -104,7 +106,8 @@ int RecvMyStoneColor() {
         enemyStoneColor = STONE_COLOR_BLACK;
         break;
     }
-
+    
+    InitGame();
     gameState = GAMESTATE_SEND_SIGNAL;
   }
 
@@ -127,7 +130,7 @@ int SendSignalForSync() {
     perror("select");
     return 0;
   } else if(retval) {
-    buf[0] = (char)SYNC_SYNCGAME;//header for sync
+    buf[0] = (char)SYNC_SYNCSIGNAL;//header for sync
     size = send(clientSockfd, buf, SYNC_BUF_SIZE, 0);
     if(size < 0) {
       if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -160,16 +163,12 @@ int GetPutablePosition() {
     return 1;
   } else if(size == 0) {
     //TODO: connection lost
+    fprintf(stderr, "%s line:%d connection lost from server\n", __FILE__, __LINE__);
     exit(1);
     return 0;
   } else {
     //judge this is my turn and get from buf putable position
-    if(buf[1] == myStoneColor) {
-      gameState = GAMESTATE_WAIT_MYPUT;
-    } else {
-      gameState = GAMESTATE_WAIT_OPPUT;
-    }
-    GenerateSelectablePutPoint(buf + 2);
+    DetermineNextRoutine(buf);
   }
 
   return 1;
@@ -178,8 +177,12 @@ int GetPutablePosition() {
 int DetermineNextRoutine(char *buf) {
   switch((SyncHeader)buf[0]) {
     case SYNC_PUTABLEPOS:
-      if((OceloStoneColor)buf[1] == myStoneColor)    gameState = GAMESTATE_WAIT_MYPUT;
-      if((OceloStoneColor)buf[1] == enemyStoneColor) gameState = GAMESTATE_WAIT_OPPUT;
+      if((OceloStoneColor)buf[1] == myStoneColor) {
+        GenerateSelectablePutPoint(buf + 2);
+        gameState = GAMESTATE_WAIT_MYPUT;
+      } else {
+        gameState = GAMESTATE_WAIT_OPPUT;
+      }
       return 1;
     case SYNC_GAMEOVER:
       GameOver();
