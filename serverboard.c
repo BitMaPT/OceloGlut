@@ -107,6 +107,8 @@ int PutStoneOnServer(int x, int y, OceloStoneColor mine, int board[OCELO_HEIGHT]
       board[y + i][x - i] = mine;
     }
   }
+
+  return 1;
 }
 
 int CanPut(int x, int y, OceloStoneColor mine, int board[OCELO_HEIGHT][OCELO_WIDTH]) {

@@ -23,8 +23,8 @@ int DetermineNextRoutine(char *buf);
 
 OceloStoneColor myStoneColor;
 OceloStoneColor enemyStoneColor;
-GameState gameState;
-ObjectList objectList;
+GameState gameState = GAMESTATE_INIT;
+//ObjectList objectList;
 
 int ControlGameWithState() {
   static int x, y;
@@ -63,10 +63,14 @@ int SetSocket(char **argv) {
   struct addrinfo stdinfo;
   struct addrinfo *result, *rp;
   
-  retval = getaddrinfo(argv[1], argv[2], &stdinfo, &result)
+  stdinfo.ai_family = AF_INET;
+  stdinfo.ai_socktype = SOCK_STREAM;
+  stdinfo.ai_protocol = 0;
+  stdinfo.ai_flags = 0;
+  
+  retval = getaddrinfo(argv[1], argv[2], &stdinfo, &result);
   if(retval != 0) {
-    fprintf(stderr, "%s line:%d getaddrinfo: ", __FILE__, __LINE__);
-    gai_strerror(retval);
+    fprintf(stderr, "%s line:%d getaddrinfo: %s", __FILE__, __LINE__, gai_strerror(retval));
     return 0;
   }
 
@@ -84,7 +88,7 @@ int SetSocket(char **argv) {
     perror("socket or connect");
     return 0;
   }
-  
+
   freeaddrinfo(result);
   clientSockfd = sockfd;
 
