@@ -1,7 +1,7 @@
 #ifndef HEADER_SYNCGAME
 #define HEADER_SYNCGAME
 
-#define SYNC_BUF_SIZE 32
+#define SYNC_BUF_SIZE 256
 
 typedef enum {
   SYNC_OPPONENT_LOST = 1,
