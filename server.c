@@ -147,7 +147,7 @@ int CreatePlayerTuple(int sockfd) {
     pt = (PlayerTuple*)malloc(sizeof(PlayerTuple));
     if(pt == NULL) {
       //TODO close two connection
-      ForceCloseConnection(pt, 0);
+      ForceCloseConnection(&tuple, 0);
       fprintf(stderr, "%s line:%d malloc error", __FILE__, __LINE__);
       return 0;
     }
@@ -224,7 +224,7 @@ int SendPutablePosition(PlayerTuple *pt, int *pos) {
   char buf[SYNC_BUF_SIZE];
   int i;
 
-  buf[0] = SYNC_PUTPOSITION;//send putable position header
+  buf[0] = (char)SYNC_PUTPOSITION;//send putable position header
   buf[1] = (char)pt->putPlayer;
   
   for(i = 0; i < OCELO_HEIGHT * OCELO_WIDTH; i++) {
@@ -320,6 +320,7 @@ int RelayPutPosition(PlayerTuple *pt, int sockfd) {
   if(sockfd == pt->sockfds[1]) sendSockfd = pt->sockfds[0];
 
   if(send(sendSockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
+    ForceCloseConnection(pt, sendSockfd);
     fprintf(stderr, "%s line:%d\n", __FILE__, __LINE__);
     perror("send");
     return 0;
@@ -383,7 +384,7 @@ void ForceCloseConnection(PlayerTuple *pt, int sockfd) {
   buf[0] = SYNC_GAMEOVER_FORCE;
   if(sockfd == pt->sockfds[0]) send(pt->sockfds[1], buf, SYNC_BUF_SIZE, 0);
   if(sockfd == pt->sockfds[1]) send(pt->sockfds[0], buf, SYNC_BUF_SIZE, 0);
-  
+
   close(pt->sockfds[0]);
   close(pt->sockfds[1]);
 
