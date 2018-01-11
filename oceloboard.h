@@ -7,7 +7,7 @@
 #define OCELO_WIDTH 8
 #define OCELO_HEIGHT 8
 
-void PutStone(int x, int y, OceloStoneColor stone);
+int PutStone(int x, int y, OceloStoneColor stone);
 int CheckAllSquaresToPut(OceloStoneColor stone);
 int GenerateSelectablePutPoint(char *list);
 int CheckAllStoneReversed();
