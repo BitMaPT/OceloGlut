@@ -7,24 +7,14 @@
 #include"stateene.h"
 #include"stateenerev.h"
 
-typedef enum GameBroadState {
+typedef enum GameState {
   GAMESTATE_INIT = 1,
-  GAMESTATE_ALLY,
-  GAMESTATE_ENEMY,
-  GAMESTATE_REVERSE_ALLY,
-  GAMESTATE_REVERSE_ENEMY
-}GameBroadState;
-
-typedef union GameDetailState {
-  AllyState allyState;
-  AllyReverse allyRev;
-  EnemyState EneState;
-  EnemyReverse EneRev;
-}GameDetailState;
-
-typedef struct GameState {
-  GameBroadState broad;
-  GameDetailState detail;
+  GAMESTATE_GET_PUTABLE,
+  GAMESTATE_SEND_SIGNAL,
+  GAMESTATE_WAIT_MYPUT,
+  GAMESTATE_SEND_POSITION,
+  GAMESTATE_WAIT_OPPUT,
+  GAMESTATE_REVERSE
 }GameState;
 
 void InitGame();
