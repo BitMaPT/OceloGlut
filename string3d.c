@@ -73,6 +73,6 @@ void StringAnim(String3D *str) {
 
   if(str->anim.stateTime >= 3000) {
     DeleteString(str);
-    FinishStringAnim();
+    //FinishStringAnim();
   }
 }
