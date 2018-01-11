@@ -7,6 +7,7 @@
 #define OCELO_HEIGHT 8
 
 int Initboard(int board[OCELO_HEIGHT][OCELO_WIDTH]);
+int PutStoneOnServer(int x, int y, OceloStoneColor mine, int board[OCELO_HEIGHT][OCELO_WIDTH]);
 int CheckPutablePoints(int board[OCELO_HEIGHT][OCELO_WIDTH], int *list, OceloStoneColor color);
 
 #endif

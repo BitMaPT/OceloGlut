@@ -43,6 +43,72 @@ int CheckPutablePoints(int board[OCELO_HEIGHT][OCELO_WIDTH], int *list, OceloSto
   return 1;
 }
 
+int PutStoneOnServer(int x, int y, OceloStoneColor mine, int board[OCELO_HEIGHT][OCELO_WIDTH]) {
+  int i;
+  OceloStoneColor enemy;
+
+  if(mine == STONE_COLOR_WHITE) enemy = STONE_COLOR_BLACK;
+  if(mine == STONE_COLOR_BLACK) enemy = STONE_COLOR_WHITE;
+
+  board[y][x] = mine;
+
+  if(CanPutRight(x, y, mine, enemy, board)) {
+    for(i = x + 1; i < OCELO_WIDTH; i++) {
+      if(board[y][i] == mine) break;
+      board[y][i] = mine;
+    }
+  }
+
+  if(CanPutLeft(x, y, mine, enemy, board)) {
+    for(i = x - 1; i >= 0; i--) {
+      if(board[y][i] == mine) break;
+      board[y][i] = mine;
+    }
+  }
+
+  if(CanPutUp(x, y, mine, enemy, board)) {
+    for(i = y - 1; i >= 0; i--) {
+      if(board[i][x] == mine) break;
+      board[i][x] = mine;
+    }
+  }
+
+  if(CanPutBelow(x, y, mine, enemy, board)) {
+    for(i = y + 1; i < OCELO_HEIGHT; i++) {
+      if(board[i][x] == mine) break;
+      board[i][x] = mine;
+    }
+  }
+
+  if(CanPutUpRight(x, y, mine, enemy, board)) {
+    for(i = 1; (x + i < OCELO_WIDTH) && (y - i >= 0); i++) {
+      if(board[y - i][x + i] == mine) break;
+      board[y - i][x + i] = mine;
+    }
+  }
+
+  if(CanPutUpLeft(x, y, mine, enemy, board)) {
+    for(i = 1; (x - i >= 0) && (y - i >= 0); i++) {
+      if(board[y - i][x - i] == mine) break;
+      board[y - i][x - i] = mine;
+    }
+  }
+
+  if(CanPutBelowRight(x, y, mine, enemy, board)) {
+    for(i = 1; (x + i < OCELO_WIDTH) && (y + i < OCELO_HEIGHT); i++) {
+      if(board[y + i][x + i] == mine) break;
+      board[y + i][x + i] = mine;
+    }
+  }
+
+  if(CanPutBelowLeft(x, y, mine, enemy, board)) {
+    for(i = 1; (x - i >= 0) && (y + i < OCELO_HEIGHT); i++) {
+      if(board[y + i][x - i] == mine) break;
+      board[y + i][x - i] = mine;
+    }
+  }
+}
+
 int CanPut(int x, int y, OceloStoneColor mine, int board[OCELO_HEIGHT][OCELO_WIDTH]) {
   int i;
   OceloStoneColor enemy;
