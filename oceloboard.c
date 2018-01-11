@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<unistd.h>
+#include"syncgame.h"
 #include"gamecontroller.h"
 #include"oceloboard.h"
 #include"ocelostone.h"
@@ -18,14 +20,20 @@ int CanPutBelowLeft(int x, int y, OceloStoneColor stone, OceloStoneColor enemy);
 Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
 
-void PutStone(int x, int y, OceloStoneColor mine) {
+int PutStone(int x, int y, OceloStoneColor mine) {
   int i;
   OceloStoneColor enemy;
+  Stone *stone;
 
   if(mine == STONE_COLOR_WHITE) enemy = STONE_COLOR_BLACK;
   if(mine == STONE_COLOR_BLACK) enemy = STONE_COLOR_WHITE;
 
-  oceloBoard[y][x] = InitOceloStone(x, y, mine);
+  stone = InitOceloStone(x, y, mine);
+  if(stone == NULL) {
+    close(clientSockfd);
+    return 0;
+  }
+  oceloBoard[y][x] = stone;
 
 
   if(CanPutRight(x, y, mine, enemy)) {
@@ -83,14 +91,16 @@ void PutStone(int x, int y, OceloStoneColor mine) {
       TriggerOfReverse(oceloBoard[y + i][x - i]);
     }
   }
+
+  return 1;
 }
 
-int GenerateSelectablePutPoint() {
+int GenerateSelectablePutPoint(char *list) {
   int x, y;
 
   for(x = 0; x < OCELO_WIDTH; x++) {
     for(y = 0; y < OCELO_HEIGHT; y++) {
-      if(oceloCanPut[y][x]) {
+      if(list[y * OCELO_WIDTH + x]) {
         if(InitOceloPoint(x, y) == NULL) {
           printf("(%s)Error line:%d\n", __FILE__, __LINE__);
           exit(1);
