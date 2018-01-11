@@ -39,10 +39,7 @@ int ControlGameWithState() {
       return GetPutablePosition();
     case GAMESTATE_WAIT_MYPUT:
       //wait for my puting stone
-      if(WaitForPut(&x, &y)) {
-        gameState = GAMESTATE_SEND_POSITION;
-      }
-      return 1;
+      return WaitForPut(&x, &y);
     case GAMESTATE_WAIT_OPPUT:
       //recieve wait for opponent putting
       return RecvPutPosition();
@@ -93,6 +90,7 @@ int RecvMyStoneColor() {
   } else if(size == 0) {
     //TODO
     //connection lost
+    exit(1);
     return 0;
   } else {
     //receive data from server
@@ -162,6 +160,7 @@ int GetPutablePosition() {
     return 1;
   } else if(size == 0) {
     //TODO: connection lost
+    exit(1);
     return 0;
   } else {
     //judge this is my turn and get from buf putable position
@@ -246,6 +245,7 @@ int RecvPutPosition() {
   } else if(size == 0) {
     //TODO:
     //connection lost
+    exit(1);
   } else {
     int x, y;
     
@@ -261,8 +261,12 @@ int WaitForPut(int *x, int *y) {
   int xx, yy;
   
   if(GetMouseDown(GLUT_LEFT_BUTTON, &xx, &yy)) {
-    if(MousePositionToSquarePosition(xx, yy, x, y)) return 1;
+    if(MousePositionToSquarePosition(xx, yy, x, y)) {
+      if(!PutStone(*x, *y, myStoneColor)) return 0;
+      gameState = GAMESTATE_SEND_POSITION;
+      return 1;
+    }
   }
 
-  return 0;
+  return 1;
 }
