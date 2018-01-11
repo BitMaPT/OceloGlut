@@ -3,6 +3,7 @@
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<netinet/in.h>
+#include<sys/select.h>
 #include<unistd.h>
 #include"server.h"
 #include"syncgame.h"
@@ -14,6 +15,18 @@ typedef enum {
   SERVER_WAIT_CHECKPOS,
   SERVER_WAIT_PUT
 }ServerStatus;
+
+typedef struct PlayerTuple PlayerTuple;
+struct PlayerTuple {
+  int sockfds[2];
+  int maxfd;
+  int syncflag[2];
+  ServerStatus status;
+  PlayerTuple *next;
+};
+
+PlayerTuple tupleHead;
+PlayerTuple *tupleTail;
 
 #define SERVER_PORT 49152
 #define BACKLOG_NUM 10
@@ -36,33 +49,73 @@ int main(int argc, char **argv) {
   sa.sin_port = htons(SERVER_PORT);
   sa.sin_addr.s_addr = INADDR_ANY;
 
+  l_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(bind(l_sockfd, (struct sockaddr*)&sa, sizeof(sa)) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("bind");
+    return 1;
+  }
+
+  if(listen(l_sockfd, BACKLOG_NUM) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("listen");
+    return 1;
+  }
+
   while(1) {
-    count = 0;
-    if(WaitForTwoPlayers(l_sockfd, sa)) exit(1);
-
-    maxfd = sockfds[0] > sockfds[1] ? sockfds[0] : sockfds[1];
-
-
-
-    buf[0] = SYNC_GAMESTART;
-    buf[1] = STONE_COLOR_BLACK;
-    if(send(sockfds[0], buf, sizeof(buf), 0) < 0) {
-      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-      perror("send");
-      return 1;
+    PlayerTuple *tuple;
+    int retval, maxfd = l_sockfd;
+    
+    //initialize readfds for select
+    FD_ZERO(&readfds);
+    FD_SET(l_sockfd, &readfds);
+    tuple = tupleHead.next;
+    while(tuple) {
+      FD_SET(tuple->sockfds[0], &readfds);
+      FD_SET(tuple->sockfds[1], &readfds);
+      maxfd = maxfd > tuple->maxfd ? maxfd : tuple->maxfd;
+      tuple = tuple->next;
     }
 
-    buf[1] = STONE_COLOR_WHITE;
-    if(send(sockfds[1], buf, sizeof(buf), 0) < 0) {
-      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-      perror("send");
-      return 1;
+    retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
+    if(FD_ISSET(l_sockfd, &readfds)) {
+      //accept new socket
+      continue;
     }
-
-    while(1) {
-
+    tuple = tupleHead.next;
+    while(tuple) {
+      if(FD_ISSET(tuple->sockfds[0], &readfds)) {
+        //some routine for socket
+        break;
+      }
+      if(FD_ISSET(tuple->sockfds[1], &readfds)) {
+        //some routine for socket
+        break;
+      }
+      tuple = tuple->next;
     }
   }
+}
+
+int AcceptNewConnection(int l_sockfd, struct sockaddr_in *sa) {
+  int sockfd;
+  socklen_t saSize = sizeof(struct sockaddr_in);
+
+  sockfd = accept(l_sockfd, (struct sockaddr*)sa, &saSize);
+  if(sockfd < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("accept");
+    return 0;
+  }
+
+  
+}
+
+int CreatePlayerTuple(int sockfd) {
+  static PlayerTuple tuple;
+  PlayerTuple *pt;
+
+
 }
 
 int SendSignalToAllClient(SyncHeader header) {
