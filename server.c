@@ -1,5 +1,6 @@
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<netinet/in.h>
@@ -21,12 +22,14 @@ struct PlayerTuple {
   int sockfds[2];
   int maxfd;
   int syncflag[2];
+  int oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
+  OceloStoneColor putPlayer;
   ServerStatus status;
   PlayerTuple *next;
 };
 
 PlayerTuple tupleHead;
-PlayerTuple *tupleTail;
+PlayerTuple *tupleTail = &tupleHead;
 
 #define SERVER_PORT 49152
 #define BACKLOG_NUM 10
@@ -108,14 +111,149 @@ int AcceptNewConnection(int l_sockfd, struct sockaddr_in *sa) {
     return 0;
   }
 
-  
+  if(!CreatePlayerTuple(sockfd)) return 0;
+
+  return 1;
 }
 
 int CreatePlayerTuple(int sockfd) {
   static PlayerTuple tuple;
+  static int isInit = 1;
   PlayerTuple *pt;
 
+  if(isInit) {
+    memset(&tuple, 0, sizeof(PlayerTuple));
+    tuple.sockfds[0] = sockfd;
+    isInit = 0;
+  } else {
+    tuple.sockfds[1] = sockfd;
+    tuple.status = ;
+    tuple.next = NULL;
+    tuple.putPlayer = STONE_COLOR_BLACK;
 
+    pt = (PlayerTuple*)malloc(sizeof(PlayerTuple));
+    if(pt == NULL) {
+      fprintf(stderr, "%s line:%d malloc error", __FILE__, __LINE__);
+      return 0;
+    }
+
+    memcpy(pt, &tuple, sizeof(PlayerTuple));
+    
+    tupleTail->next = pt;
+    tupleTail = pt;
+    
+    //determine and send player stone colors to players
+
+    isInit = 1;
+  }
+
+  return 1;
+}
+
+int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd) {
+  switch(pt->status) {
+    //switch by status
+  }
+}
+
+//CheckPutablePosition.
+//if there is no putable position, check opponent putable position.
+//if both position is none, end game 
+int CheckPutablePosition(PlayerTuple *pt) {
+  if(/*check putable position*/) {
+    if(!SendPutablePosition(pt)) return 0;
+  } else {
+    switch(pt->putPlayer) {
+      case STONE_COLOR_BLACK: 
+        pt->putPlayer = STONE_COLOR_WHITE;
+        break;
+      case STONE_COLOR_WHITE:
+        pt->putPlayer = STONE_COLOR_BLACK;
+        break;
+    }
+    if(/*check putable position*/) {
+      if(!SendPutablePosition(pt)) return 0;
+    } else {
+      //send gameover signal
+    }
+  }
+
+  switch(pt->putPlayer) {
+    case STONE_COLOR_BLACK:
+      pt->putPlayer = STONE_COLOR_WHITE;
+      break;
+    case STONE_COLOR_WHITE:
+      pt->putPlayer = STONE_COLOR_BLACK;
+      break;
+  }
+
+  return 1;
+}
+
+//send header, put player and putable position
+//put player is determined by OceloStoneColor
+int SendPutablePosition(PlayerTuple *pt, int *pos, int size) {
+  char buf[SYNC_BUF_SIZE];
+  int i;
+
+  buf[0] = ;//send putable position header
+  buf[1] = (char)pt->putPlayer;
+  
+  for(i = 0; i < size; i++) {
+    buf[i + 2] = (char)pos[i];
+  }
+
+  for(i = 0; i < 2; i++) {
+    if(send(pt->sockfds[i], buf, SYNC_BUF_SIZE, 0) < 0) {
+      //TODO connection lost corresponding
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("send");
+      //delete playerTuple list
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+//send gameover signal
+//after send signal, two players socket is closed and delete PlayerTuple from list
+int SendGameoverSignal(PlayerTuple *pt) {
+  int i;
+  char buf[SYNC_BUF_SIZE];
+  
+  buf[0] = ;//header of gameover
+  for(i = 0; i < 2; i++) {
+    if(send(pt->sockfds[i], buf, SYNC_BUF_SIZE, 0) < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("send");
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+int RecvSyncSignal(PlayerTuple *pt, int sockfd) {
+  char buf[SYNC_BUF_SIZE];
+  ssize_t size;
+
+  size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
+  if(size < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("recv");
+    return 0;
+  }
+
+  if(sockfd == pt->sockfds[0]) {
+    pt->syncflag[0] = 1;
+  } else {
+    pt->syncflag[1] = 1;
+  }
+
+  
+
+  return 1;
 }
 
 int SendSignalToAllClient(SyncHeader header) {
@@ -242,242 +380,6 @@ int RecvSyncSignal() {
         break;
       }
     }
-  }
-
-  return 1;
-}
-
-
-int ServerControlState() {
-  switch(status) {
-    case SERVER_WAIT_SYNC:
-      WaitForSync();
-    case SERVER_WAIT_CHECKPOS:
-    case SERVER_WAIT_PUT:
-  }
-}
-
-int WaitForSync() {
-  char *buf;
-  int p1, p2;
-
-  p1 = 0;
-  p2 = 0;
-
-  buf = (char*)malloc(sizeof(char) * SYNC_BUF_SIZE);
-
-  while(p1 && p2) {
-    if(WaitForSignalFromClient(buf) == 0) {
-      exit(1);
-    }
-
-    if(buf[0] == SYNC_READY_NEXTTURN) {
-      switch(buf[1]) {
-        case STONE_COLOR_BLACK: 
-          p1 = 1;
-          break;
-        case STONE_COLOR_WHITE:
-          p2 = 1;
-          break;
-        default:
-          fprintf(stderr, "%s, line:%d invalid data\n", __FILE__, __LINE__);
-          return 0;
-      }
-    } else {
-      fprintf(stderr, "%s line:%d invalid header\n", __FILE__, __LINE__);
-      return 0;
-    }
-  }
-
-  free(buf);
-
-  return 1;
-}
-
-int WaitCheckPos() {
-  SyncHeader headers[2], *header;
-  char *buf;
-  int p1 = 0, p2 = 0;
-
-  buf = (char*)malloc(sizeof(char) * SYNC_BUF_SIZE);
-
-  while(1) {
-    WaitForSignalFromClient(buf);
-
-    switch(buf[1]) {
-      case STONE_COLOR_BLACK:
-        header = &headers[1];
-        p1 = 1;
-        break;
-      case STONE_COLOR_WHITE:
-        header = &headers[0];
-        p2 = 1;
-        break;
-    }
-
-    switch(buf[0]) {
-      case SYNC_WAITPUT:
-        *header = SYNC_WAITPUT;
-        break;
-      case SYNC_NO_POSITION:
-        *header = SYNC_NO_POSITION;
-        break;
-      case SYNC_ENDGAME:
-        *header = SYNC_ENDGAME;
-        break;
-    }
-
-    if(p1 && p2) {
-      if(headers[0] == headers[1]) {
-        if(send(sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
-          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-          perror("send");
-          return 0;
-        }
-        if(send(sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0) {
-          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-          perror("send");
-          return 0;
-        }
-
-        if(headers[0] == SYNC_WAITPUT) {
-          status = SERVER_WAIT_PUT;
-        } else {
-          status = SERVER_WAIT_SYNC;
-        }
-        return 1;
-      }
-    } else {
-      buf[0] = SYNC_CHECK_MISMATCH;
-      if(send(sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
-        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-        perror("send");
-        return 0;
-      }
-      if(send(sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0) {
-        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-        perror("send");
-        return 0;
-      }
-
-      return 0;
-    }
-  }
-  
-}
-
-int WaitPutPos() {
-  char *buf;
-
-  buf = (char*)malloc(sizeof(char) * SYNC_BUF_SIZE);
-
-  if(WaitForSignalFromClient(buf) == 0){
-    free(buf);
-    return 0;
-  }
-
-  if(buf[0] == SYNC_POSITION) {
-    switch(buf[1]) {
-      case STONE_COLOR_BLACK:
-        if(send(sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0) {
-          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-          perror("send");
-          return 0;
-        }
-        break;
-      case STONE_COLOR_WHITE:
-        if(send(sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
-          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-          perror("send");
-          return 0;
-        }
-        break;
-      default:
-        fprintf(stderr, "%s line:%d error stonecolor\n", __FILE__, __LINE__);
-        return 0;
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
-int WaitForTwoPlayers(int l_sockfd, struct sockaddr_in sa) {
-  int newSockfd;
-  socklen_t saSize = sizeof(sa);
-  int retval, count = 0;
-  char buf[1];
-
-  while(count < 2) {
-    newSockfd = accept(l_sockfd, (struct sockaddr*)&sa, &saSize);
-    if(newSockfd < 0) {
-      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-      perror("accept");
-    } else {
-      //valid file discriptor
-      sockfds[count++] = newSockfd;
-    }
-  }
-
-  return 1;
-}
-
-int WaitForSignalFromClient(char *buf) {
-  int retval, maxfd;
-  fd_set readfds;
-
-  FD_ZERO(&readfds);
-  FD_SET(sockfds[0], &readfds);
-  FD_SET(sockfds[1], &readfds);
-
-  maxfd = (sockfds[0] > sockfds[1]) ? sockfds[0] : sockfds[1];
-  retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
-
-  if(retval < 0) {
-    fprintf(stderr, "%s, line:%d ", __FILE__, __LINE__);
-    perror("select");
-    close(sockfds[0]);
-    close(sockfds[1]);
-    return 0;
-  } else if(retval) {
-    if(FD_ISSET(sockfds[0], &readfds)) {
-      RecvSignalFromClient(sockfds[0], buf);
-      return 1;
-    }
-    if(FD_ISSET(sockfds[1], &readfds)) {
-      RecvSignalFromClient(sockfds[1], buf);
-      return 1;
-    }
-
-    return 0;
-  }
-
-  return 1;
-}
-
-int RecvSignalFromClient(int sockfd, char *buf) {
-  ssize_t size;
-
-  size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
-  if(size == 0) return 0;
-  if(size <  0) {
-    close(sockfds[0]);
-    close(sockfds[1]);
-    return -1;
-  }
-
-  return 1;
-}
-
-int SendSignalToClient(int sockfd, SyncHeader header) {
-  ssize_t size;
-  char buf[SYNC_BUF_SIZE];
-
-  buf[0] = header;
-  if(send(sockfd, buf, sizeof(buf), 0) < 0) {
-    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-    perror("send");
-    return 0;
   }
 
   return 1;
