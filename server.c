@@ -12,9 +12,8 @@
 #include"oceloboard.h"
 
 typedef enum {
-  SERVER_WAIT_SYNC,
-  SERVER_WAIT_CHECKPOS,
-  SERVER_WAIT_PUT
+  SERVER_WAIT_PUT,
+  SERVER_WAIT_SYNC
 }ServerStatus;
 
 typedef struct PlayerTuple PlayerTuple;
@@ -127,9 +126,11 @@ int CreatePlayerTuple(int sockfd) {
     isInit = 0;
   } else {
     tuple.sockfds[1] = sockfd;
-    tuple.status = ;
+    tuple.status = SERVER_WAIT_SYNC;
     tuple.next = NULL;
     tuple.putPlayer = STONE_COLOR_BLACK;
+
+    isInit = 1;
 
     pt = (PlayerTuple*)malloc(sizeof(PlayerTuple));
     if(pt == NULL) {
@@ -141,10 +142,25 @@ int CreatePlayerTuple(int sockfd) {
     
     tupleTail->next = pt;
     tupleTail = pt;
-    
-    //determine and send player stone colors to players
 
-    isInit = 1;
+    //determine and send player stone colors to players
+    {
+      char buf[SYNC_BUF_SIZE];
+      buf[0] = ;//gamestart header
+      buf[1] = (char)STONE_COLOR_BLACK;
+      if(send(pt->sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
+        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+        perror("send");
+        return 0;
+      }
+
+      buf[1] = (char)STONE_COLOR_WHITE;
+      if(send(pt->sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0) {
+        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+        perror("send");
+        return 0;
+      }
+    }
   }
 
   return 1;
@@ -152,7 +168,10 @@ int CreatePlayerTuple(int sockfd) {
 
 int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd) {
   switch(pt->status) {
-    //switch by status
+    case SERVER_WAIT_PUT:
+      return RelayPutPosition(pt, sockfd);
+    case SERVER_WAIT_SYNC:
+      return RecvSyncSignal(pt, sockfd);
   }
 }
 
@@ -160,6 +179,8 @@ int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd) {
 //if there is no putable position, check opponent putable position.
 //if both position is none, end game 
 int CheckPutablePosition(PlayerTuple *pt) {
+  int pos[OCELO_HEIGHT * OCELO_WIDTH];
+
   if(/*check putable position*/) {
     if(!SendPutablePosition(pt)) return 0;
   } else {
@@ -192,14 +213,14 @@ int CheckPutablePosition(PlayerTuple *pt) {
 
 //send header, put player and putable position
 //put player is determined by OceloStoneColor
-int SendPutablePosition(PlayerTuple *pt, int *pos, int size) {
+int SendPutablePosition(PlayerTuple *pt, int *pos) {
   char buf[SYNC_BUF_SIZE];
   int i;
 
   buf[0] = ;//send putable position header
   buf[1] = (char)pt->putPlayer;
   
-  for(i = 0; i < size; i++) {
+  for(i = 0; i < OCELO_HEIGHT * OCELO_WIDTH; i++) {
     buf[i + 2] = (char)pos[i];
   }
 
@@ -234,6 +255,8 @@ int SendGameoverSignal(PlayerTuple *pt) {
   return 1;
 }
 
+//recieve signals of two players
+//signal means "ready to next turn"
 int RecvSyncSignal(PlayerTuple *pt, int sockfd) {
   char buf[SYNC_BUF_SIZE];
   ssize_t size;
@@ -251,136 +274,51 @@ int RecvSyncSignal(PlayerTuple *pt, int sockfd) {
     pt->syncflag[1] = 1;
   }
 
-  
-
-  return 1;
-}
-
-int SendSignalToAllClient(SyncHeader header) {
-  char buf[SYNC_BUF_SIZE];
-  int i;
-
-  buf[0] = (char)header;
-  for(i = 0; i < 2; i++) {
-    if(send(sockfds[i], buf, SYNC_BUF_SIZE, 0) < 0) {
-      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-      perror("send");
-      return 0;
-    }
-  }
-  
-  return 1;
-}
-
-int SendPutPosition(int sockfd, int x, int y) {
-  char buf[SYNC_BUF_SIZE];
-
-  buf[0] = ; //store header of put position
-  buf[1] = (char)x;
-  buf[2] = (char)y;
-
-  if(send(sockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
-    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-    perror("send");
-    return 0;
+  if(pt->syncflag[0] && pt->syncflag[1]) {
+    //check putable position
   }
 
   return 1;
 }
 
-int RecvPutPosition(int sockfd) {
+int RelayPutPosition(PlayerTuple *pt, int sockfd) {
   char buf[SYNC_BUF_SIZE];
   int sendSockfd;
   ssize_t size;
-  
+
   size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
   if(size == 0) {
-    //connection lost
+    //TODO: connection lost
+    return 0;
   } else if(size < 0) {
-    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    fprintf(stderr, "%s line:%d\n", __FILE__, __LINE__);
     perror("recv");
     return 0;
   }
 
-  sendSockfd = (sockfd == sockfds[0]) ? sockfds[0] : sockfds[1];
-  if(!SendPutPosition(sendSockfd, buf[1], buf[2])) return 0;
-  
-  return 1;
-}
+  if(sockfd == pt->sockfds[0]) sendSockfd = pt->sockfds[1];
+  if(sockfd == pt->sockfds[1]) sendSockfd = pt->sockfds[0];
 
-int SendPutablePosition(int sockfd, int *list, size_t size) {
-  char buf[SYNC_BUF_SIZE];
-  int i;
-
-  buf[0] = ;//store header of put position info
-  for(i = 0; i < size; i++) {
-    buf[i + 1] = (char)list[i];
-  }
-
-  if(send(sockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
-    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+  if(send(sendSockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "%s line:%d\n", __FILE__, __LINE__);
     perror("send");
     return 0;
   }
 
+  pt->status = SERVER_WAIT_SYNC;
+
   return 1;
 }
 
-//recieve syncronise signal from two clients
-int RecvSyncSignal() {
-  int i, j, retval, maxfd;
-  int sockfd;
-  fd_set readfds;
+int RenewOceloBoard(PlayerTuple *pt, char *buf) {
+  int x, y;
+  OceloStoneColor color;
 
-  FD_ZERO(&readfds);
-  for(i = 0; i < 2; i++) {
-    FD_SET(sockfds[i], &readfds);
-  }
+  x = (int)buf[1];
+  y = (int)buf[2];
 
-  maxfd = (sockfds[0] > sockfds[1]) ? sockfds[0] : sockfds[1];
-  retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
-  
-  if(retval <= 0) {
-    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-    perror("select");
-    return 0;
-  } else {
-    //recive signal from client
-    for(i = 0; i < 2; i++) {
-      if(FD_ISSET(sockfds[i], &readfds)) {
-        ssize_t size;
-        char buf[SYNC_BUF_SIZE];
-
-        //not selected socket file discripter is stored to sockfd
-        switch(i) {
-          case 0: sockfd = sockfds[1]; break;
-          case 1: sockfd = sockfds[0]; break;
-        }
-
-        size = recv(sockfds[i], buf, SYNC_BUF_SIZE, 0);
-        if(size == 0) {
-          //connection lost
-          return 0;
-        } else if(size < 0) {
-          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-          perror("recv");
-          return 0;
-        }
-
-        size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
-        if(size == 0) {
-          //connection lost
-          return 0;
-        } else if(size < 0) {
-          fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-          perror("recv");
-          return 0;
-        }
-        
-        break;
-      }
-    }
-  }
+  //TODO
+  //renew ocelo board
 
   return 1;
 }
