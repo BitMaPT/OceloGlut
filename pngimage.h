@@ -40,6 +40,7 @@ int LoadImage(char *filename);
 Image* InitImage(char *filename, int pos[2], int size[2], int (*Animation)(Image*));
 int CheckAllImageAnimationFinished();
 
+int ImageNoneAnim(Image *image);
 int ImageAnimByYaxis(Image *image);
 int ImageAnimByXaxis(Image *image);
 
