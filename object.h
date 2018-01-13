@@ -4,17 +4,18 @@
 #include"ocelostone.h"
 #include"putpoint.h"
 #include"string3d.h"
+#include"bitstring.h"
 
 typedef enum ObjectType {
   OBJECT_OCELO_STONE,
   OBJECT_SELECTABLE_POINT,
-  OBJECT_STRING
+  OBJECT_BITSTRING
 }ObjectType;
 
 typedef union ObjectBody {
   Stone *stone;
   OceloPoint *point;
-  String3D *string;
+  BitString *string;
 }ObjectBody;
 
 typedef struct Object {

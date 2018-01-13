@@ -9,22 +9,23 @@ int DrawObject(Object *obj);
 int UpdateObject(Object *obj);
 int DeleteObjectList(ObjectList *list);
 
-static ObjectList *last;
-static ObjectList head;
+
+static ObjectList listHead;
+static ObjectList *listTail;
 
 static ObjectList list;
 
 int ObjectListInit() {
-  head.obj = NULL;
-  head.next = NULL;
-  last = NULL;
+  listHead.obj = NULL;
+  listHead.next = NULL;
+  listTail = &listHead;
   return 1;
 }
 
 int UpdateAllObject() {
   ObjectList *objList;
 
-  objList = head.next;
+  objList = listHead.next;
   while(objList) {
     UpdateObject(objList->obj);
     objList = objList->next;
@@ -36,7 +37,7 @@ int UpdateAllObject() {
 int DrawAllObject() {
   ObjectList *objList;
 
-  objList = head.next;
+  objList = listHead.next;
   while(objList) {
     glPushMatrix();
     DrawObject(objList->obj);
@@ -55,7 +56,7 @@ int DrawObject(Object *obj) {
     case OBJECT_SELECTABLE_POINT:
       DrawPoint(obj->object.point);
       break;
-    case OBJECT_STRING:
+    case OBJECT_BITSTRING:
       DrawString(obj->object.string);
       break;
     default:
@@ -74,7 +75,7 @@ int UpdateObject(Object *obj) {
     case OBJECT_SELECTABLE_POINT:
       UpdatePoint(obj->object.point);
       break;
-    case OBJECT_STRING:
+    case OBJECT_BITSTRING:
       UpdateString(obj->object.string);
       break;
     default:
@@ -94,13 +95,8 @@ int AddObject(Object *obj) {
   list->next = NULL;
   list->obj = obj;
 
-  if(head.next == NULL) {
-    head.next = list;
-  }
-  if(last != NULL) {
-    last->next = list;
-  }
-  last = list;
+  listTail->next = list;
+  listTail = list;
 
   return 1;
 }
@@ -109,7 +105,7 @@ int DeleteAllObject() {
   ObjectList *list;
   ObjectList *temp;
 
-  list = head.next;
+  list = listHead.next;
   while(list) {
     temp = list->next;
     DeleteObjectList(list);
@@ -122,14 +118,14 @@ int DeleteAllObject() {
 int DeleteSelectedTypeObject(ObjectType type) {
   ObjectList *list, *before;
 
-  list = head.next;
-  before = &head;
+  list = listHead.next;
+  before = &listHead;
 
   while(list) {
     if(list->obj->type == type) {
       before->next = list->next;
-      if(list == last) {
-        last = before;
+      if(list == listTail) {
+        listTail = before;
       }
       DeleteObjectList(list);
       list = before->next;
@@ -146,13 +142,13 @@ int DeleteSelectedTypeObject(ObjectType type) {
 int DeleteObject(Object *obj) {
   ObjectList *list, *before;
 
-  list = head.next;
-  before = &head;
+  list = listHead.next;
+  before = &listHead;
   while(list) {
     if(list->obj == obj) {
       before->next = list->next;
-      if(list == last) {
-        last = before;
+      if(list == listTail) {
+        listTail = before;
       }
       DeleteObjectList(list);
       return 1;
@@ -173,7 +169,7 @@ int DeleteObjectList(ObjectList *list) {
     case OBJECT_SELECTABLE_POINT:
       free(list->obj->object.point);
       break;
-    case OBJECT_STRING:
+    case OBJECT_BITSTRING:
       free(list->obj->object.string);
       break;
   }
@@ -186,14 +182,14 @@ int DeleteObjectList(ObjectList *list) {
 int DeleteString(String3D *str) {
   ObjectList *list, *before;
 
-  list = head.next;
-  before = &head;
+  list = listHead.next;
+  before = &listHead;
   while(list) {
-    if(list->obj->type == OBJECT_STRING) {
+    if(list->obj->type == OBJECT_BITSTRING) {
       if(list->obj->object.string == str) {
         before->next = list->next;
-        if(list == last) {
-          last = before;
+        if(list == listTail) {
+          listTail = before;
         }
 
         DeleteObjectList(list);
