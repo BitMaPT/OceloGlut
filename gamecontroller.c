@@ -14,6 +14,7 @@
 #include"mouse.h"
 #include"syncgame.h"
 #include"pngimage.h"
+#include"gameover.h"
 
 int SetWaitOpponentSign();
 int RecvMyStoneColor();
@@ -73,9 +74,14 @@ int ControlGameWithState() {
       return 1;
     case GAMESTATE_WAIT_GAMEOVER_SIGN:
       if(CheckAllImageAnimationFinished()) {
+        SetResult();
         gameState = GAMESTATE_RESULT_PUTSTONE;
       }
       return 1;
+    case GAMESTATE_RESULT_PUTSTONE:
+      return ResultStonePut();
+    case GAMESTATE_RESULT_SHOWRESULT:
+      return WaitClickToExit();
   }
 
   return 0;
