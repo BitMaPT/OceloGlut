@@ -71,6 +71,11 @@ int ControlGameWithState() {
         gameState = GAMESTATE_SEND_SIGNAL;
       }
       return 1;
+    case GAMESTATE_WAIT_GAMEOVER_SIGN:
+      if(CheckAllImageAnimationFinished()) {
+        gameState = GAMESTATE_RESULT_PUTSTONE;
+      }
+      return 1;
   }
 
   return 0;
@@ -275,8 +280,18 @@ int DetermineNextRoutine(char *buf) {
 }
 
 int GameOver() {
+  int pos[] = {WIDTH / 2, HEIGHT / 2};
+  int size[] = {255, 255};
+
   close(clientSockfd);
-  exit(0);
+
+  if(InitImage("Stunt.png", pos, size, ImageAnimByYaxis) == NULL) {
+    exit(1);
+  }
+
+  gameState = GAMESTATE_WAIT_GAMEOVER_SIGN;
+
+  return 1;
 }
 
 int SendPutPosition(int x, int y) {
