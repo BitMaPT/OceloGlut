@@ -100,6 +100,7 @@ int GenerateSelectablePutPoint(char *list) {
 
   for(x = 0; x < OCELO_WIDTH; x++) {
     for(y = 0; y < OCELO_HEIGHT; y++) {
+      oceloCanPut[y][x] = (int)list[y * OCELO_WIDTH + x];
       if(list[y * OCELO_WIDTH + x]) {
         if(InitOceloPoint(x, y) == NULL) {
           printf("(%s)Error line:%d\n", __FILE__, __LINE__);
@@ -300,4 +301,8 @@ int MousePositionToSquarePosition(int x, int y, int *xx, int *yy) {
   *yy = y / 70;
 
   return 1;
+}
+
+int CheckPositionIsPutable(int x, int y) {
+  return oceloCanPut[y][x];
 }

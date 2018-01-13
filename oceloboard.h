@@ -12,6 +12,7 @@ int CheckAllSquaresToPut(OceloStoneColor stone);
 int GenerateSelectablePutPoint(char *list);
 int CheckAllStoneReversed();
 int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
+int CheckPositionIsPutable(int x, int y);
 
 extern Stone* oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
 extern int oceloCanPut[OCELO_HEIGHT][OCELO_WIDTH];
