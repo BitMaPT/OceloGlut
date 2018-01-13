@@ -1,11 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<GL/glut.h>
+#include<unistd.h>
 #include"oceloboard.h"
 #include"object.h"
 #include"mouse.h"
 #include"gamecontroller.h"
 #include"pngimage.h"
+#include"syncgame.h"
 
 void Display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -31,7 +33,11 @@ void Idle() {
   if(timenow > timestd) {
     timestd = timenow + (1000 / 60);
     
-    ControlGameWithState();
+    if(!ControlGameWithState()) {
+      close(clientSockfd);
+      exit(1);
+    }
+
     UpdateAllObject();
 
     glutPostRedisplay();
