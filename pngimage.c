@@ -231,6 +231,20 @@ int ImageAnimByXaxis(Image *image) {
   return 1;
 }
 
+int ImageAnimZoomIn(Image *image) {
+  int nowTime = glutGet(GLUT_ELAPSED_TIME);
+  GLdouble scale = 1.0;
+
+  image->state.stateTime = nowTime - image->state.startTime;
+  if(500 > image->state.stateTime) {
+    scale =  (0.7 / 500.0) * image->state.stateTime + 0.3;
+  }
+
+  glScaled(scale, scale, 0);
+
+  return 1;
+}
+
 int CheckAllImageAnimationFinished() {
   ImageList *list;
 

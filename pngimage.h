@@ -43,5 +43,6 @@ int CheckAllImageAnimationFinished();
 int ImageNoneAnim(Image *image);
 int ImageAnimByYaxis(Image *image);
 int ImageAnimByXaxis(Image *image);
+int ImageAnimZoomIn(Image *image);
 
 #endif
