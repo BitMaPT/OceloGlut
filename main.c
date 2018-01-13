@@ -21,7 +21,7 @@ void Display() {
 void Resize(int w, int h) {
   glViewport(0, 0, w, h);
   glLoadIdentity();
-  glOrtho(0, WIDTH, HEIGHT, 0, -300.0, 300.0);
+  glOrtho(0, w, h, 0, -300.0, 300.0);
 }
 
 void Idle() {

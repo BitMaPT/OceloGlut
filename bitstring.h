@@ -1,6 +1,8 @@
 #ifndef HEADER_BITSTRING
 #define HEADER_BITSTRING
 
+#include<GL/glut.h>
+
 typedef struct {
   int startTime;
   int stateTime;
@@ -12,7 +14,7 @@ typedef struct {
   char **strPattern;
   int patternNum;
   int pos[2];
-  double color[3];
+  GLdouble color[3];
   StringState state;
 }BitString;
 
