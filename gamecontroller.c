@@ -9,6 +9,7 @@
 #include"object.h"
 #include"oceloboard.h"
 #include"ocelostone.h"
+#include"bitstring.h"
 #include"gamecontroller.h"
 #include"mouse.h"
 #include"syncgame.h"
@@ -165,6 +166,9 @@ int SendSignalForSync() {
   char buf[SYNC_BUF_SIZE];
   int retval;
   struct timeval tval = {0, 0};
+  double color[] = {0, 0, 0};
+
+  if(InitBitString(0, 0, color, 200, 3, "Now Synchronizing.", "Now Synchronizing..", "Now Synchronizing...") == NULL) return 0;
 
   FD_ZERO(&writefds);
   FD_SET(clientSockfd, &writefds);
@@ -213,6 +217,7 @@ int GetPutablePosition() {
     return 0;
   } else {
     //judge this is my turn and get from buf putable position
+    DeleteSelectedTypeObject(OBJECT_BITSTRING);
     DetermineNextRoutine(buf);
   }
 
@@ -310,6 +315,7 @@ int WaitForPut(int *x, int *y) {
   
   if(GetMouseDown(GLUT_LEFT_BUTTON, &xx, &yy)) {
     if(MousePositionToSquarePosition(xx, yy, x, y)) {
+      if(!CheckPositionIsPutable(*x, *y)) return 1;
       if(!PutStone(*x, *y, myStoneColor)) return 0;
       DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
       gameState = GAMESTATE_SEND_POSITION;

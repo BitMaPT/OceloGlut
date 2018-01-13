@@ -10,8 +10,6 @@ int DeleteObjectList(ObjectList *list);
 static ObjectList listHead;
 static ObjectList *listTail;
 
-static ObjectList list;
-
 int ObjectListInit() {
   listHead.obj = NULL;
   listHead.next = NULL;
