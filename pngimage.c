@@ -172,27 +172,15 @@ int ImageAnimByYaxis(Image *image) {
   int nowTime = glutGet(GLUT_ELAPSED_TIME);
 
   image->state.stateTime = nowTime - image->state.startTime;
-  if(image->state.shiftTime < image->state.stateTime) {
-    image->state.startTime = nowTime;
-    image->state.stateTime = 0;
-    image->state.stateNumber++;
-    if(image->state.stateNumber == image->state.stateCount) {
-      image->state.animEnd = 1;
-    }
-  }
-
-  if(image->state.animEnd) return 0;
-
-  switch(image->state.stateNumber) {
-    case 0: 
-      angle = (90.0 / image->state.shiftTime) * image->state.stateTime - 90;
-      break;
-    case 1:
-      angle = 0;
-      break;
-    case 2:
-      angle = (90.0 / image->state.shiftTime) * image->state.stateTime;
-      break;
+  if(image->state.stateTime < 300) {
+    angle = (90.0 / 300.0) * image->state.stateTime - 90;
+  } else if(image->state.stateTime >= 300 && image->state.stateTime < 1000) {
+    angle = 0;
+  } else if(image->state.stateTime >= 1000 && image->state.stateTime < 1300) {
+    angle = (90.0 / 300.0) * image->state.stateTime - 300;
+  } else {
+    image->state.animEnd = 1;
+    return 0;
   }
 
   glTranslatef(image->pos[0], image->pos[1], 0);
@@ -206,27 +194,15 @@ int ImageAnimByXaxis(Image *image) {
   int nowTime = glutGet(GLUT_ELAPSED_TIME);
 
   image->state.stateTime = nowTime - image->state.startTime;
-  if(image->state.shiftTime < image->state.stateTime) {
-    image->state.startTime = nowTime;
-    image->state.stateTime = 0;
-    image->state.stateNumber++;
-    if(image->state.stateNumber == image->state.stateCount) {
-      image->state.animEnd = 1;
-    }
-  }
-  
-  if(image->state.animEnd) return 0;
-
-  switch(image->state.stateNumber) {
-    case 0: 
-      angle = (90.0 / image->state.shiftTime) * image->state.stateTime - 90;
-      break;
-    case 1:
-      angle = 0;
-      break;
-    case 2:
-      angle = (90.0 / image->state.shiftTime) * image->state.stateTime;
-      break;
+  if(image->state.stateTime < 300) {
+    angle = (90.0 / 300.0) * image->state.stateTime - 90;
+  } else if(image->state.stateTime >= 300 && image->state.stateTime < 1000) {
+    angle = 0;
+  } else if(image->state.stateTime >= 1000 && image->state.stateTime < 1300) {
+    angle = (90.0 / 300.0) * image->state.stateTime - 300;
+  } else {
+    image->state.animEnd = 1;
+    return 0;
   }
 
   glTranslatef(image->pos[0], image->pos[1], 0);
@@ -238,10 +214,11 @@ int ImageAnimByXaxis(Image *image) {
 int ImageAnimZoomIn(Image *image) {
   int nowTime = glutGet(GLUT_ELAPSED_TIME);
   GLdouble scale = 1.0;
+  float shiftTime = 200.0;
 
   image->state.stateTime = nowTime - image->state.startTime;
-  if(300 > image->state.stateTime) {
-    scale =  (0.7 / 500.0) * image->state.stateTime + 0.3;
+  if(shiftTime > image->state.stateTime) {
+    scale =  (0.7 / shiftTime) * image->state.stateTime + 0.3;
   }
 
   glTranslated(image->pos[0], image->pos[1], -10);
