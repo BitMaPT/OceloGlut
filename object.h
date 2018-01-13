@@ -4,17 +4,20 @@
 #include"ocelostone.h"
 #include"putpoint.h"
 #include"bitstring.h"
+#include"pngimage.h"
 
 typedef enum ObjectType {
   OBJECT_OCELO_STONE,
   OBJECT_SELECTABLE_POINT,
-  OBJECT_BITSTRING
+  OBJECT_BITSTRING,
+  OBJECT_PNGIMAGE
 }ObjectType;
 
 typedef union ObjectBody {
   Stone *stone;
   OceloPoint *point;
   BitString *string;
+  Image *image;
 }ObjectBody;
 
 typedef struct Object Object;

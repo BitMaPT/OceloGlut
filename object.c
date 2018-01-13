@@ -65,7 +65,8 @@ int DeleteAllObject() {
   list = listHead.next;
   while(list) {
     temp = list->next;
-    DeleteObjectList(list);
+    list->obj->Delete(list->obj);
+    free(list);
     list = temp;  
   }
 
@@ -111,6 +112,7 @@ int DeleteObject(Object *obj) {
         listTail = before;
       }
       list->obj->Delete(list->obj);
+      free(list->obj);
       return 1;
     }
 
