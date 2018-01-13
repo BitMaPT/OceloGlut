@@ -43,7 +43,7 @@ BitString* InitBitString(int x, int y, double color[3], int ctime, int patterns,
       char *copiedStr;
 
       str = va_arg(list, char*);
-      copiedStr = (char*)malloc(sizeof(char) * strlen(str));
+      copiedStr = (char*)malloc(sizeof(char) * (strlen(str) + 1));
       if(copiedStr == NULL) {
         fprintf(stderr, "%s line:%d malloc error\n", __FILE__, __LINE__);
         return NULL;
