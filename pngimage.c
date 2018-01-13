@@ -240,10 +240,11 @@ int ImageAnimZoomIn(Image *image) {
   GLdouble scale = 1.0;
 
   image->state.stateTime = nowTime - image->state.startTime;
-  if(500 > image->state.stateTime) {
+  if(300 > image->state.stateTime) {
     scale =  (0.7 / 500.0) * image->state.stateTime + 0.3;
   }
 
+  glTranslated(image->pos[0], image->pos[1], -10);
   glScaled(scale, scale, 0);
 
   return 1;
@@ -274,8 +275,8 @@ void DeleteImage(Object *obj) {
         imageTail = before;
       }
 
-      free(list);
       free(list->image);
+      free(list);
       break;
     }
     before = list;

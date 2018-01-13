@@ -8,7 +8,7 @@ int DeleteObjectList(ObjectList *list);
 
 
 static ObjectList listHead;
-static ObjectList *listTail;
+static ObjectList *listTail = &listHead;
 
 int ObjectListInit() {
   listHead.obj = NULL;
