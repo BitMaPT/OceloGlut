@@ -37,6 +37,7 @@ void Idle() {
     UpdateAllObject();
 
     glutPostRedisplay();
+    ResetMouseState();
   }
 }
 
