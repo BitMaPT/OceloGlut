@@ -197,6 +197,8 @@ int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd) {
     case SERVER_WAIT_SYNC:
       return RecvSyncSignal(pt, sockfd);
   }
+
+  return 0;
 }
 
 //CheckPutablePosition.

@@ -3,7 +3,6 @@
 
 #include"ocelostone.h"
 #include"putpoint.h"
-#include"string3d.h"
 #include"bitstring.h"
 
 typedef enum ObjectType {
@@ -41,6 +40,5 @@ int DeleteAllObject();
 int DeleteObject(Object *obj);
 int AddObject(Object *obj);
 int DeleteSelectedTypeObject(ObjectType type);
-int DeleteString(String3D *str);
 
 #endif

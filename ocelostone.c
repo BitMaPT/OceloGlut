@@ -74,6 +74,8 @@ GLdouble CalcAngle(Stone *stone) {
     case STONE_STATE_REVERSE_W2B:
       return ((GLdouble)180 / REVERSE_STATE_TIME) * stone->state.stateTime + 180.0;
   }
+
+  return 0;
 }
 
 void StateAutoMaton(Stone *stone) {
@@ -109,12 +111,14 @@ StoneStateContena InitStoneStateContena(StoneState state) {
   switch(state) {
     case STONE_STATE_BLACK:
     case STONE_STATE_WHITE:
-      return s;
+      break;
     case STONE_STATE_REVERSE_B2W:
     case STONE_STATE_REVERSE_W2B:
       s.shiftTime = REVERSE_STATE_TIME;
-      return s;
+      break;
   }
+
+  return s;
 }
 
 void DrawStone(Object *obj) {

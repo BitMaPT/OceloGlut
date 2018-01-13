@@ -2,10 +2,6 @@
 #define HEADER_GAMECONTROLLER
 
 #include"ocelostone.h"
-#include"stateally.h"
-#include"stateallyrev.h"
-#include"stateene.h"
-#include"stateenerev.h"
 
 typedef enum GameState {
   GAMESTATE_INIT = 1,
