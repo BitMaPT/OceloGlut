@@ -32,6 +32,10 @@ int LoadImage(char *filename) {
   }
 
   list->id = pngBind(filename, PNG_NOMIPMAP, PNG_ALPHA, &(list->info), GL_CLAMP, GL_NEAREST, GL_NEAREST);
+  if(list->id == 0) {
+    fprintf(stderr, "%s line:%d image bind error\n", __FILE__, __LINE__);
+    return 0;
+  }
   strcpy(list->name, filename);
   list->next = NULL;
 
