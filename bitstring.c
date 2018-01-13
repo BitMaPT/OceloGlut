@@ -6,6 +6,10 @@
 #include"bitstring.h"
 #include"object.h"
 
+void UpdateBitString(Object *obj);
+void DrawBitString(Object *obj);
+void DeleteBitString(Object *obj);
+
 BitString* InitBitString(int x, int y, double color[3], int ctime, int patterns, ...) {
   va_list list;
   BitString *bitStr;
@@ -63,6 +67,9 @@ BitString* InitBitString(int x, int y, double color[3], int ctime, int patterns,
 
   obj->object.string = bitStr;
   obj->type = OBJECT_BITSTRING;
+  obj->Update = UpdateBitString;
+  obj->Delete = DeleteBitString;
+  obj->Draw = DrawBitString;
 
   if(AddObject(obj) == 0) return NULL;
 
