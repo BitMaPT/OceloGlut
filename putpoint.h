@@ -15,8 +15,6 @@ typedef struct OceloPoint {
   int pos[2];
 }OceloPoint;
 
-void UpdatePoint(OceloPoint *point);
 OceloPoint *InitOceloPoint(int x, int y);
-void DrawPoint(OceloPoint *point);
 
 #endif

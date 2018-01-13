@@ -18,10 +18,14 @@ typedef union ObjectBody {
   BitString *string;
 }ObjectBody;
 
-typedef struct Object {
+typedef struct Object Object;
+struct Object {
   ObjectType type;
   ObjectBody object;
-}Object;
+  void(*Update)(Object*);
+  void(*Draw)(Object*);
+  void(*Delete)(Object*);
+};
 
 typedef struct ObjectList ObjectList;
 

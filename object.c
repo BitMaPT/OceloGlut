@@ -1,8 +1,5 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include"ocelostone.h"
-#include"putpoint.h"
-#include"string3d.h"
 #include"object.h"
 
 int DrawObject(Object *obj);
@@ -27,7 +24,7 @@ int UpdateAllObject() {
 
   objList = listHead.next;
   while(objList) {
-    UpdateObject(objList->obj);
+    objList->obj->Update(objList->obj);
     objList = objList->next;
   }
 
@@ -40,47 +37,9 @@ int DrawAllObject() {
   objList = listHead.next;
   while(objList) {
     glPushMatrix();
-    DrawObject(objList->obj);
+    objList->obj->Draw(objList->obj);
     objList = objList->next;
     glPopMatrix();
-  }
-
-  return 1;
-}
-
-int DrawObject(Object *obj) {
-  switch(obj->type) {
-    case OBJECT_OCELO_STONE:
-      DrawStone(obj->object.stone);
-      break;
-    case OBJECT_SELECTABLE_POINT:
-      DrawPoint(obj->object.point);
-      break;
-    case OBJECT_BITSTRING:
-      DrawString(obj->object.string);
-      break;
-    default:
-      printf("(%s)Error line:%d\n", __FILE__, __LINE__);
-      exit(1);
-  }
-
-  return 1;
-}
-
-int UpdateObject(Object *obj) {
-  switch(obj->type) {
-    case OBJECT_OCELO_STONE:
-      UpdateStone(obj->object.stone);
-      break;
-    case OBJECT_SELECTABLE_POINT:
-      UpdatePoint(obj->object.point);
-      break;
-    case OBJECT_BITSTRING:
-      UpdateString(obj->object.string);
-      break;
-    default:
-      printf("(%s)Error line:%d\n", __FILE__, __LINE__);
-      exit(1);
   }
 
   return 1;
@@ -122,12 +81,15 @@ int DeleteSelectedTypeObject(ObjectType type) {
   before = &listHead;
 
   while(list) {
-    if(list->obj->type == type) {
+    Object *obj = list->obj;
+
+    if(obj->type == type) {
       before->next = list->next;
       if(list == listTail) {
         listTail = before;
       }
-      DeleteObjectList(list);
+
+      obj->Delete(obj);
       list = before->next;
       continue;
     }
@@ -150,7 +112,7 @@ int DeleteObject(Object *obj) {
       if(list == listTail) {
         listTail = before;
       }
-      DeleteObjectList(list);
+      list->obj->Delete(list->obj);
       return 1;
     }
 
@@ -177,29 +139,4 @@ int DeleteObjectList(ObjectList *list) {
   free(list->obj);
   free(list);
   return 1;
-}
-
-int DeleteString(String3D *str) {
-  ObjectList *list, *before;
-
-  list = listHead.next;
-  before = &listHead;
-  while(list) {
-    if(list->obj->type == OBJECT_BITSTRING) {
-      if(list->obj->object.string == str) {
-        before->next = list->next;
-        if(list == listTail) {
-          listTail = before;
-        }
-
-        DeleteObjectList(list);
-        return 1;
-      }
-    }
-
-    before = list;
-    list = list->next;
-  }
-
-  return 0;
 }

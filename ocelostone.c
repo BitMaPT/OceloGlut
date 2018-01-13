@@ -11,10 +11,14 @@
 void StateProgress(Stone *stone, StoneState next);
 StoneStateContena InitStoneStateContena(StoneState state);
 void StateAutoMaton(Stone *stone);
-int DrawStone(Stone *stone);
+void DrawStone(Object *obj);
+void DeleteStone(Object *obj);
+void UpdateStone(Object *obj);
 GLdouble CalcAngle(Stone *stone);
 
-void UpdateStone(Stone *stone) {
+void UpdateStone(Object *obj) {
+  Stone *stone = obj->object.stone;
+
   StateAutoMaton(stone);
   stone->angle = CalcAngle(stone);
 }
@@ -50,6 +54,9 @@ Stone* InitOceloStone(int x, int y, OceloStoneColor type) {
 
   obj->type = OBJECT_OCELO_STONE;
   obj->object.stone = stone;
+  obj->Update = UpdateStone;
+  obj->Delete = DeleteStone;
+  obj->Draw = DrawStone;
 
   if(AddObject(obj) == 0) return NULL;
 
@@ -110,8 +117,11 @@ StoneStateContena InitStoneStateContena(StoneState state) {
   }
 }
 
-int DrawStone(Stone *stone) {
+void DrawStone(Object *obj) {
   int xx, yy;
+  Stone *stone;
+
+  stone = obj->object.stone;
 
   xx = 40 + 70 * stone->pos[0] + 35;
   yy = 40 + 70 * stone->pos[1] + 35;
@@ -134,8 +144,6 @@ int DrawStone(Stone *stone) {
     glVertex2d(cx, cy);
   }
   glEnd();
-
-  return 1;
 }
 
 void TriggerOfReverse(Stone *stone) {
@@ -152,5 +160,9 @@ void TriggerOfReverse(Stone *stone) {
       printf("(%s)Error line:%d\n", __FILE__, __LINE__);
       exit(1);
   }
+}
+
+void DeleteStone(Object *obj) {
+  free(obj->object.stone);
 }
 

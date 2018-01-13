@@ -6,8 +6,12 @@
 #include"object.h"
 
 int PointStateContena(OceloPoint *point);
+void UpdatePoint(Object *obj);
+void DeletePoint(Object *obj);
+void DrawPoint(Object *obj);
 
-void UpdatePoint(OceloPoint *point) {
+void UpdatePoint(Object *obj) {
+  OceloPoint *point = obj->object.point;
   PointStateContena(point);
 }
 
@@ -28,6 +32,9 @@ OceloPoint *InitOceloPoint(int x, int y) {
 
   obj->object.point = point;
   obj->type = OBJECT_SELECTABLE_POINT;
+  obj->Update = UpdatePoint;
+  obj->Draw = DrawPoint;
+  obj->Delete = DeletePoint;
 
   AddObject(obj);
 
@@ -43,8 +50,11 @@ int PointStateContena(OceloPoint *point) {
   return 1;
 }
 
-void DrawPoint(OceloPoint *point) {
+void DrawPoint(Object *obj) {
   int xx, yy;
+  OceloPoint *point;
+
+  point = obj->object.point;
 
   xx = 40 + point->pos[0] * 70 + 35;
   yy = 40 + point->pos[1] * 70 + 35;
@@ -62,4 +72,8 @@ void DrawPoint(OceloPoint *point) {
   glEnd();
 
   glDisable(GL_BLEND);
+}
+
+void DeletePoint(Object *obj) {
+  free(obj->object.point);
 }
