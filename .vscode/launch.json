@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
   {
-    "name": "(gdb) Launch",
+    "name": "client(gdb)",
     "type": "cppdbg",
     "request": "launch",
-    "program": "${workspaceFolder}/a.out",
-    "args": [],
+    "program": "${workspaceFolder}/client.out",
+    "args": ["localhost", "49152"],
     "stopAtEntry": false,
     "cwd": "${workspaceFolder}",
     "environment": [],
