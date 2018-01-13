@@ -5,6 +5,7 @@
 #include<unistd.h>
 #include<netdb.h>
 #include<errno.h>
+#include<fcntl.h>
 #include"object.h"
 #include"oceloboard.h"
 #include"ocelostone.h"
@@ -73,7 +74,7 @@ int SetSocket(char **argv) {
     fprintf(stderr, "%s line:%d getaddrinfo: %s", __FILE__, __LINE__, gai_strerror(retval));
     return 0;
   }
-
+  printf("relay");
   for(rp = result; rp != NULL; rp = rp->ai_next) {
     sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     
@@ -91,6 +92,12 @@ int SetSocket(char **argv) {
 
   freeaddrinfo(result);
   clientSockfd = sockfd;
+
+  {
+    int config;
+    config = fcntl(clientSockfd, F_GETFD, 0);
+    fcntl(clientSockfd, F_SETFD, config | O_NONBLOCK);
+  }
 
   return 1;
 }
@@ -217,8 +224,10 @@ int DetermineNextRoutine(char *buf) {
     case SYNC_PUTABLEPOS:
       if((OceloStoneColor)buf[1] == myStoneColor) {
         GenerateSelectablePutPoint(buf + 2);
+        printf("my turn %d\n", buf[1]);
         gameState = GAMESTATE_WAIT_MYPUT;
       } else {
+        printf("op turn %d\n", buf[1]);
         gameState = GAMESTATE_WAIT_OPPUT;
       }
       return 1;
@@ -302,6 +311,7 @@ int WaitForPut(int *x, int *y) {
   if(GetMouseDown(GLUT_LEFT_BUTTON, &xx, &yy)) {
     if(MousePositionToSquarePosition(xx, yy, x, y)) {
       if(!PutStone(*x, *y, myStoneColor)) return 0;
+      DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
       gameState = GAMESTATE_SEND_POSITION;
       return 1;
     }
