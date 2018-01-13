@@ -125,18 +125,31 @@ void DrawImage(Object *obj) {
   y = image->size[1];
 
   glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, image->id);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_CULL_FACE);
+
   
+  glColor3d(1, 1, 1);
   if(image->Animation(image)) {
-    glBegin(GL_POLYGON);
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(-x / 2, -y / 2);
-    glTexCoord2f(0.0f, 1.0f); glVertex2f(-x / 2, y / 2);
-    glTexCoord2f(1.0f, 1.0f); glVertex2f(x / 2, y / 2);
-    glTexCoord2f(1.0f, 0.0f); glVertex2f(x / 2, -y / 2);
+    glRotated(180, 0, 1, 0);
+    glRotated(180, 1, 0, 0); 
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(1.0f, 1.0f); glVertex2f(-x / 2, -y / 2);
+    glTexCoord2f(1.0f, 0.0f); glVertex2f(-x / 2, y / 2);
+    glTexCoord2f(0.0f, 0.0f); glVertex2f(x / 2, y / 2);
+    glTexCoord2f(0.0f, 1.0f); glVertex2f(x / 2, -y / 2);
+
+    glTexCoord2f(1.0f, 1.0f); glVertex2f(x / 2, -y / 2);
+    glTexCoord2f(1.0f, 0.0f); glVertex2f(x / 2, y / 2);
+    glTexCoord2f(0.0f, 0.0f); glVertex2f(-x / 2, y / 2);
+    glTexCoord2f(0.0f, 1.0f); glVertex2f(-x / 2, -y / 2);
     glEnd();
   }
 
+  glDisable(GL_CULL_FACE);
   glDisable(GL_BLEND);
   glDisable(GL_TEXTURE_2D);
 }
@@ -220,6 +233,7 @@ int CheckAllImageAnimationFinished() {
   list = imageHead.next;
   while(list) {
     if(!list->image->state.animEnd) return 0;
+    list = list->next;
   }
 
   return 1;
