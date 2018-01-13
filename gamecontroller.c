@@ -25,6 +25,7 @@ int RecvPutPosition();
 int SendPutPosition(int x, int y);
 int GameOver();
 int DetermineNextRoutine(char *buf);
+int RecvSignalForceGameover();
 
 OceloStoneColor myStoneColor;
 OceloStoneColor enemyStoneColor;
@@ -81,7 +82,9 @@ int ControlGameWithState() {
     case GAMESTATE_RESULT_PUTSTONE:
       return ResultStonePut();
     case GAMESTATE_RESULT_SHOWRESULT:
+    case GAMESTATE_CONNECITON_LOST:
       return WaitClickToExit();
+
   }
 
   return 0;
@@ -165,20 +168,29 @@ int RecvMyStoneColor() {
   char buf[SYNC_BUF_SIZE];
 
   size = recv(clientSockfd, buf, SYNC_BUF_SIZE, 0);
-  printf("wait stone color\n");
+
   if(size < 0) {
     if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
+      //any error is occured in socket communication
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
-      return 0;
+
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
     } 
   } else if(size == 0) {
-    //TODO
-    //connection lost
+    //connection lost from server
     fprintf(stderr, "%s line:%d connection lost\n", __FILE__, __LINE__);
-    exit(1);
-    return 0;
+
+    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    gameState = GAMESTATE_CONNECITON_LOST;
   } else {
+    if(buf[0] == SYNC_GAMEOVER_FORCE) {
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
+      return 1;
+    }
+
     //receive data from server
     switch((OceloStoneColor)buf[1]) {
       case STONE_COLOR_BLACK:
@@ -212,6 +224,8 @@ int SendSignalForSync() {
   FD_SET(clientSockfd, &writefds);
   retval = select(clientSockfd + 1, NULL, &writefds, NULL, &tval);
 
+  RecvSignalForceGameover();
+
   if(retval < 0) {
     fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
     perror("select");
@@ -223,7 +237,9 @@ int SendSignalForSync() {
       if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
         fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
         perror("send");
-        return 0;
+
+        if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+        gameState = GAMESTATE_CONNECITON_LOST;
       }
 
       return 1;
@@ -245,16 +261,29 @@ int GetPutablePosition() {
     if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
-      return 0;
+
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
     }
+
     return 1;
   } else if(size == 0) {
-    //TODO: connection lost
+    //connection lost from server
     fprintf(stderr, "%s line:%d connection lost from server\n", __FILE__, __LINE__);
-    exit(1);
-    return 0;
+    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    gameState = GAMESTATE_CONNECITON_LOST;
+
+    return 1;
   } else {
     //judge this is my turn and get from buf putable position
+
+    //connection lost from opponent
+    if(buf[0] == SYNC_GAMEOVER_FORCE) {
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
+      return 1;
+    }
+
     DeleteSelectedTypeObject(OBJECT_BITSTRING);
     DetermineNextRoutine(buf);
   }
@@ -273,7 +302,7 @@ int DetermineNextRoutine(char *buf) {
         InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
         gameState = GAMESTATE_WAIT_MYTURN_SIGN;
       } else {
-        InitImage("Stung.png", pos, size, ImageAnimByXaxis);
+        InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
         gameState = GAMESTATE_WAIT_OPTURN_SIGN;
       }
       return 1;
@@ -308,6 +337,8 @@ int SendPutPosition(int x, int y) {
   FD_ZERO(&writefds);
   FD_SET(clientSockfd, &writefds);
   retval = select(clientSockfd + 1, NULL, &writefds, NULL, &tval);
+
+  RecvSignalForceGameover();
   
   if(retval < 0) {
     fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
@@ -319,11 +350,14 @@ int SendPutPosition(int x, int y) {
     buf[0] = (char)SYNC_PUTPOSITION;//header of send position
     buf[1] = (char)x;
     buf[2] = (char)y;
+
     if(send(clientSockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
       if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
         fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
         perror("send");
-        return 0;
+
+        if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+        gameState = GAMESTATE_CONNECITON_LOST;
       }
       return 1;
     }
@@ -341,29 +375,41 @@ int RecvPutPosition() {
   size = recv(clientSockfd, buf, SYNC_BUF_SIZE, 0);
   if(size < 0) {
     if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
+      //any error is occured in socket communication
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
-      return 0;
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
     }
-    return 1;
   } else if(size == 0) {
-    //TODO:
-    //connection lost
-    exit(1);
+    //connection lost from server
+    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    gameState = GAMESTATE_CONNECITON_LOST;
   } else {
     int x, y;
     
     x = (int)buf[1];
     y = (int)buf[2];
+
+    //connection lost from opponent
+    if(buf[0] == (char)SYNC_GAMEOVER_FORCE) {
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
+      return 1;
+    }
+
     PutStone(x, y, enemyStoneColor);
     gameState = GAMESTATE_REVERSE;
-    return 1;
   }
+
+  return 1;
 }
 
 int WaitForPut(int *x, int *y) {
   int xx, yy;
-  
+
+  RecvSignalForceGameover();
+
   if(GetMouseDown(GLUT_LEFT_BUTTON, &xx, &yy)) {
     if(MousePositionToSquarePosition(xx, yy, x, y)) {
       if(!CheckPositionIsPutable(*x, *y)) return 1;
@@ -371,6 +417,33 @@ int WaitForPut(int *x, int *y) {
       DeleteSelectedTypeObject(OBJECT_SELECTABLE_POINT);
       gameState = GAMESTATE_SEND_POSITION;
       return 1;
+    }
+  }
+
+  return 1;
+}
+
+int RecvSignalForceGameover() {
+  ssize_t size;
+  char buf[SYNC_BUF_SIZE];
+
+  size = recv(clientSockfd, buf, SYNC_BUF_SIZE, 0);
+  if(size < 0) {
+    if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("recv");
+
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
+    }
+  } else if(size == 0) {
+    fprintf(stderr, "%s line:%d connection lost from server\n", __FILE__, __LINE__);
+    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    gameState = GAMESTATE_CONNECITON_LOST;
+  } else {
+    if(buf[0] == SYNC_GAMEOVER_FORCE) {
+      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      gameState = GAMESTATE_CONNECITON_LOST;
     }
   }
 
