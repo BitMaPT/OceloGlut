@@ -15,6 +15,7 @@
 #include"syncgame.h"
 #include"pngimage.h"
 
+int SetWaitOpponentSign();
 int RecvMyStoneColor();
 int SendSignalForSync();
 int WaitForPut(int *x, int *y);
@@ -34,6 +35,9 @@ int ControlGameWithState() {
 
   switch(gameState) {
     case GAMESTATE_INIT:
+      //only putting synchronizing sign image
+      return SetWaitOpponentSign();
+    case GAMESTATE_WAIT_OPPONENT:
       //wait for my color
       return RecvMyStoneColor();
     case GAMESTATE_SEND_SIGNAL:
@@ -46,6 +50,11 @@ int ControlGameWithState() {
       if(CheckAllImageAnimationFinished()) {
         GenerateSelectablePutPoint();
         gameState = GAMESTATE_WAIT_MYPUT;
+      }
+      return 1;
+    case GAMESTATE_WAIT_OPTURN_SIGN:
+      if(CheckAllImageAnimationFinished()) {
+        gameState = GAMESTATE_WAIT_OPPUT;
       }
       return 1;
     case GAMESTATE_WAIT_MYPUT:
@@ -103,8 +112,8 @@ int SetSocket(char **argv) {
 
   {
     int config;
-    config = fcntl(clientSockfd, F_GETFD, 0);
-    fcntl(clientSockfd, F_SETFD, config | O_NONBLOCK);
+    config = fcntl(clientSockfd, F_GETFL, 0);
+    fcntl(clientSockfd, F_SETFL, config | O_NONBLOCK);
   }
 
   return 1;
@@ -130,11 +139,22 @@ void InitGame() {
   return;
 }
 
+int SetWaitOpponentSign() {
+  int pos[] = {WIDTH / 2, HEIGHT / 2};
+  int size[] = {255, 255};
+
+  if(InitImage("Stunt.png", pos, size, ImageNoneAnim) == NULL) return 0;
+
+  gameState = GAMESTATE_WAIT_OPPONENT;
+  return 1;
+}
+
 int RecvMyStoneColor() {
   ssize_t size;
   char buf[SYNC_BUF_SIZE];
 
   size = recv(clientSockfd, buf, SYNC_BUF_SIZE, 0);
+  printf("wait stone color\n");
   if(size < 0) {
     if(!(errno == EAGAIN || errno == EWOULDBLOCK)) {
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
@@ -159,7 +179,7 @@ int RecvMyStoneColor() {
         enemyStoneColor = STONE_COLOR_BLACK;
         break;
     }
-
+    DeleteSelectedTypeObject(OBJECT_PNGIMAGE);
     InitGame();
     gameState = GAMESTATE_SEND_SIGNAL;
   }
@@ -232,18 +252,18 @@ int GetPutablePosition() {
 }
 
 int DetermineNextRoutine(char *buf) {
+  int pos[] = {WIDTH / 2, HEIGHT / 2};
+  int size[] = {225, 225};
+
   switch((SyncHeader)buf[0]) {
     case SYNC_PUTABLEPOS:
       if((OceloStoneColor)buf[1] == myStoneColor) {
         SetSelectablePutPoint(buf + 2);
-        {
-          int pos[] = {WIDTH / 2, HEIGHT / 2};
-          int size[] = {225, 225};
-          InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
-          gameState = GAMESTATE_WAIT_MYTURN_SIGN;
-        }
+        InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
+        gameState = GAMESTATE_WAIT_MYTURN_SIGN;
       } else {
-        gameState = GAMESTATE_WAIT_OPPUT;
+        InitImage("Stung.png", pos, size, ImageAnimByXaxis);
+        gameState = GAMESTATE_WAIT_OPTURN_SIGN;
       }
       return 1;
     case SYNC_GAMEOVER:
