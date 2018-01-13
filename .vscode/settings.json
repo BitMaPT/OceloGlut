@@ -7,7 +7,8 @@
     "gamecontroller.h": "c",
     "object.h": "c",
     "syncgame.h": "c",
-    "stateallyrev.h": "c"
+    "stateallyrev.h": "c",
+    "pngimage.h": "c"
   },
   "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

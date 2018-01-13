@@ -105,7 +105,7 @@ void SetSelectablePutPoint(char *list) {
   }
 }
 
-int GenerateSelectablePutPoint(char *list) {
+int GenerateSelectablePutPoint() {
   int x, y;
 
   for(x = 0; x < OCELO_WIDTH; x++) {

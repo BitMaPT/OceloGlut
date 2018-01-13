@@ -9,7 +9,7 @@
 
 int PutStone(int x, int y, OceloStoneColor stone);
 int CheckAllSquaresToPut(OceloStoneColor stone);
-int GenerateSelectablePutPoint(char *list);
+int GenerateSelectablePutPoint();
 int CheckAllStoneReversed();
 int MousePositionToSquarePosition(int x, int y, int *xx, int *yy);
 int CheckPositionIsPutable(int x, int y);
