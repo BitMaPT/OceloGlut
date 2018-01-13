@@ -95,13 +95,22 @@ int PutStone(int x, int y, OceloStoneColor mine) {
   return 1;
 }
 
+void SetSelectablePutPoint(char *list) {
+  int x, y;
+  
+  for(x = 0; x < OCELO_WIDTH; x++) {
+    for(y = 0; y < OCELO_HEIGHT; y++) {
+      oceloCanPut[y][x] = (int)list[y * OCELO_WIDTH + x];
+    }
+  }
+}
+
 int GenerateSelectablePutPoint(char *list) {
   int x, y;
 
   for(x = 0; x < OCELO_WIDTH; x++) {
     for(y = 0; y < OCELO_HEIGHT; y++) {
-      oceloCanPut[y][x] = (int)list[y * OCELO_WIDTH + x];
-      if(list[y * OCELO_WIDTH + x]) {
+      if(oceloCanPut[y][x]) {
         if(InitOceloPoint(x, y) == NULL) {
           printf("(%s)Error line:%d\n", __FILE__, __LINE__);
           exit(1);
