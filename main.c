@@ -47,7 +47,7 @@ void Idle() {
 
 void init(int argc, char **argv) {
   glClearColor(0, 0.7, 0, 1);
-  if(!SetSocket(argv)) exit(1);
+  if(!SetSocket(argc, argv)) exit(1);
   if(!LoadImage("Stunt.png")) exit(1);
 }
 
