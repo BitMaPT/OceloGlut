@@ -122,21 +122,3 @@ int DeleteObject(Object *obj) {
 
   return 0;
 }
-
-int DeleteObjectList(ObjectList *list) {
-  switch(list->obj->type) {
-    case OBJECT_OCELO_STONE:
-      free(list->obj->object.stone);
-      break;
-    case OBJECT_SELECTABLE_POINT:
-      free(list->obj->object.point);
-      break;
-    case OBJECT_BITSTRING:
-      free(list->obj->object.string);
-      break;
-  }
-
-  free(list->obj);
-  free(list);
-  return 1;
-}
