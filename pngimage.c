@@ -5,6 +5,7 @@
 #include<string.h>
 #include"object.h"
 #include"pngimage.h"
+#include"gamecontroller.h"
 
 void UpdateImage(Object *obj);
 void DrawImage(Object *obj);
@@ -16,6 +17,9 @@ ImageList *imageTail = &imageHead;
 
 ImageCacheList cacheHead;
 ImageCacheList *cacheTail = &cacheHead;
+
+int defaultPos[] = {WIDTH / 2, HEIGHT / 2};
+int defaultSize[] = {255, 255};
 
 int LoadImage(char *filename) {
   ImageCacheList *list;

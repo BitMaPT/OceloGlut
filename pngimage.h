@@ -45,4 +45,7 @@ int ImageAnimByYaxis(Image *image);
 int ImageAnimByXaxis(Image *image);
 int ImageAnimZoomIn(Image *image);
 
+extern int defaultPos[];
+extern int defaultSize[];
+
 #endif
