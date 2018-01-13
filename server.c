@@ -234,7 +234,7 @@ int SendPutablePosition(PlayerTuple *pt, int *pos) {
   char buf[SYNC_BUF_SIZE];
   int i;
 
-  buf[0] = (char)SYNC_PUTPOSITION;//send putable position header
+  buf[0] = (char)SYNC_PUTABLEPOS;//send putable position header
   buf[1] = (char)pt->putPlayer;
   
   for(i = 0; i < OCELO_HEIGHT * OCELO_WIDTH; i++) {
@@ -335,7 +335,9 @@ int RelayPutPosition(PlayerTuple *pt, int sockfd) {
     perror("send");
     return 0;
   }
+  printf("relay\n");
 
+  RenewOceloBoard(pt, buf);
   pt->status = SERVER_WAIT_SYNC;
 
   return 1;
