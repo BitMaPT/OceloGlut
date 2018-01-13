@@ -13,6 +13,7 @@
 #include"gamecontroller.h"
 #include"mouse.h"
 #include"syncgame.h"
+#include"pngimage.h"
 
 int RecvMyStoneColor();
 int SendSignalForSync();
@@ -41,6 +42,12 @@ int ControlGameWithState() {
     case GAMESTATE_GET_PUTABLE:
       //wait for sending putable position info
       return GetPutablePosition();
+    case GAMESTATE_WAIT_MYTURN_SIGN:
+      if(CheckAllImageAnimationFinished()) {
+        GenerateSelectablePutPoint();
+        gameState = GAMESTATE_WAIT_MYPUT;
+      }
+      return 1;
     case GAMESTATE_WAIT_MYPUT:
       //wait for my puting stone
       return WaitForPut(&x, &y);
@@ -228,11 +235,14 @@ int DetermineNextRoutine(char *buf) {
   switch((SyncHeader)buf[0]) {
     case SYNC_PUTABLEPOS:
       if((OceloStoneColor)buf[1] == myStoneColor) {
-        GenerateSelectablePutPoint(buf + 2);
-        printf("my turn %d\n", buf[1]);
-        gameState = GAMESTATE_WAIT_MYPUT;
+        SetSelectablePutPoint(buf + 2);
+        {
+          int pos[] = {WIDTH / 2, HEIGHT / 2};
+          int size[] = {225, 225};
+          InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
+          gameState = GAMESTATE_WAIT_MYTURN_SIGN;
+        }
       } else {
-        printf("op turn %d\n", buf[1]);
         gameState = GAMESTATE_WAIT_OPPUT;
       }
       return 1;
