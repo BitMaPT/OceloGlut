@@ -33,14 +33,15 @@ int Initboard(int board[OCELO_HEIGHT][OCELO_WIDTH]) {
 
 int CheckPutablePoints(int board[OCELO_HEIGHT][OCELO_WIDTH], int *list, OceloStoneColor color) {
   int x, y;
-
+  int putable = 0;
   for(y = 0; y < OCELO_HEIGHT; y++) {
     for(x = 0; x < OCELO_WIDTH; x++) {
       list[y * OCELO_HEIGHT + x] = CanPut(x, y, color, board);
+      putable |= list[y * OCELO_HEIGHT + x];
     }
   }
 
-  return 1;
+  return putable;
 }
 
 int PutStoneOnServer(int x, int y, OceloStoneColor mine, int board[OCELO_HEIGHT][OCELO_WIDTH]) {

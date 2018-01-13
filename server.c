@@ -208,6 +208,7 @@ int CheckPutablePosition(PlayerTuple *pt) {
   int pos[OCELO_HEIGHT * OCELO_WIDTH];
 
   if(CheckPutablePoints(pt->oceloBoard, pos, pt->putPlayer)) {
+    printf("putable 1\n");
     return SendPutablePosition(pt, pos);
   } else {
     switch(pt->putPlayer) {
@@ -220,9 +221,11 @@ int CheckPutablePosition(PlayerTuple *pt) {
     }
 
     if(CheckPutablePoints(pt->oceloBoard, pos, pt->putPlayer)) {
+      printf("putable 2\n");
       return SendPutablePosition(pt, pos);
     } else {
       //send gameover signal
+      printf("gameover\n");
       return SendGameoverSignal(pt);
     }
   }
