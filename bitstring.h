@@ -16,4 +16,6 @@ typedef struct {
   StringState state;
 }BitString;
 
+BitString* InitBitString(int x, int y, double color[3], int ctime, int patterns, ...);
+
 #endif

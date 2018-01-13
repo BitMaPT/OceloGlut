@@ -94,7 +94,7 @@ void DrawBitString(Object *obj) {
   char *str;
   int length, i;
 
-  str = bitstr->strPattern[bitstr->patternNum];
+  str = bitstr->strPattern[bitstr->state.stateNum];
 
   glRasterPos2f((GLfloat)bitstr->pos[0], (GLfloat)bitstr->pos[1] + 15);
   length = strlen(str);
