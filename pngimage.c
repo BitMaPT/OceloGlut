@@ -19,7 +19,7 @@ ImageCacheList cacheHead;
 ImageCacheList *cacheTail = &cacheHead;
 
 int defaultPos[] = {WIDTH / 2, HEIGHT / 2};
-int defaultSize[] = {255, 255};
+int defaultSize[] = {360, 240};
 
 int LoadImage(char *filename) {
   ImageCacheList *list;

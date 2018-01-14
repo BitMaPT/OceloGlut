@@ -47,8 +47,18 @@ void Idle() {
 
 void init(int argc, char **argv) {
   glClearColor(0, 0.7, 0, 1);
-  if(!SetSocket(argc, argv)) exit(1);
   if(!LoadImage("Stunt.png")) exit(1);
+  if(!LoadImage("img/comerror.png")) exit(1);
+  if(!LoadImage("img/draw.png")) exit(1);
+  if(!LoadImage("img/gameover.png")) exit(1);
+  if(!LoadImage("img/lose.png")) exit(1);
+  if(!LoadImage("img/myturn.png")) exit(1);
+  if(!LoadImage("img/oplost.png")) exit(1);
+  if(!LoadImage("img/opturn.png")) exit(1);
+  if(!LoadImage("img/search.png")) exit(1);
+  if(!LoadImage("img/serverlost.png")) exit(1);
+  if(!LoadImage("img/win.png")) exit(1);
+  if(!SetSocket(argc, argv)) exit(1);
 }
 
 void closeWindow() {
