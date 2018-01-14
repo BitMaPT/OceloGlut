@@ -4,8 +4,10 @@
 #include<math.h>
 #include"ocelostone.h"
 #include"object.h"
+#include"oceloboard.h"
 
 #define CIRCLE_VERTEX 100
+#define OCELO_STONE_RADIUS 20
 #define REVERSE_STATE_TIME 500 //(ms)
 
 void StateProgress(Stone *stone, StoneState next);
@@ -127,8 +129,8 @@ void DrawStone(Object *obj) {
 
   stone = obj->object.stone;
 
-  xx = 40 + 70 * stone->pos[0] + 35;
-  yy = 40 + 70 * stone->pos[1] + 35;
+  xx = OCELO_MARGIN + OCELO_SQUARE_SIZE * stone->pos[0] + (OCELO_SQUARE_SIZE / 2);
+  yy = OCELO_MARGIN + OCELO_SQUARE_SIZE * stone->pos[1] + (OCELO_SQUARE_SIZE / 2);
 
   int i;
   double cx, cy;
@@ -142,8 +144,8 @@ void DrawStone(Object *obj) {
   glRotated(stone->angle, 0, 1.0, 0);
   glBegin(GL_POLYGON);
   for(i = 0; i < CIRCLE_VERTEX; i++) {
-    cx = 20 * cos(2 * M_PI * ((double)i / CIRCLE_VERTEX));
-    cy = 20 * sin(2 * M_PI * ((double)i / CIRCLE_VERTEX));
+    cx = OCELO_STONE_RADIUS * cos(2 * M_PI * ((double)i / CIRCLE_VERTEX));
+    cy = OCELO_STONE_RADIUS * sin(2 * M_PI * ((double)i / CIRCLE_VERTEX));
 
     glVertex2d(cx, cy);
   }

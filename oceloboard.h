@@ -6,6 +6,8 @@
 
 #define OCELO_WIDTH 8
 #define OCELO_HEIGHT 8
+#define OCELO_MARGIN 40
+#define OCELO_SQUARE_SIZE 70
 
 int PutStone(int x, int y, OceloStoneColor stone);
 int CheckAllSquaresToPut(OceloStoneColor stone);
