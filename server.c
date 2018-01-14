@@ -499,10 +499,10 @@ void ForceCloseConnection(PlayerTuple *pt, int sockfd) {
     }
   }
 
-  shutdown(pt->sockfds[0], SHUT_WR);
-  shutdown(pt->sockfds[1], SHUT_WR);
-  // close(pt->sockfds[0]);
-  // close(pt->sockfds[1]);
+  // shutdown(pt->sockfds[0], SHUT_WR);
+  // shutdown(pt->sockfds[1], SHUT_WR);
+  close(pt->sockfds[0]);
+  close(pt->sockfds[1]);
 
   //find pt from PlayerTuple list
   DeletePlayerTupleList(pt);
