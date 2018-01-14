@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include<sys/socket.h>
 #include<sys/types.h>
 #include<unistd.h>
@@ -90,7 +91,7 @@ int ControlGameWithState() {
   return 0;
 }
 
-int SetSocket(char **argv) {
+int SetSocket(int argc, char **argv) {
   int sockfd, retval;
   struct addrinfo stdinfo;
   struct addrinfo *result, *rp;
@@ -105,7 +106,7 @@ int SetSocket(char **argv) {
     fprintf(stderr, "%s line:%d getaddrinfo: %s", __FILE__, __LINE__, gai_strerror(retval));
     return 0;
   }
-  printf("relay");
+
   for(rp = result; rp != NULL; rp = rp->ai_next) {
     sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     
@@ -123,6 +124,22 @@ int SetSocket(char **argv) {
 
   freeaddrinfo(result);
   clientSockfd = sockfd;
+
+  {
+    char buf[SYNC_BUF_SIZE];
+
+    memset(buf, 0, SYNC_BUF_SIZE);
+    if(argc >= 4) {
+      strncpy(buf, argv[3], sizeof(buf));
+      buf[sizeof(buf) - 1] = '\0';
+    }
+
+    if(send(sockfd, buf, SYNC_BUF_SIZE, 0) < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("send");
+      return 0;
+    }
+  }
 
   {
     int config;
@@ -272,13 +289,14 @@ int GetPutablePosition() {
     fprintf(stderr, "%s line:%d connection lost from server\n", __FILE__, __LINE__);
     if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
     gameState = GAMESTATE_CONNECITON_LOST;
-
+    printf("size == 0\n");
     return 1;
   } else {
     //judge this is my turn and get from buf putable position
-
+    printf("size > 0\n");
     //connection lost from opponent
     if(buf[0] == SYNC_GAMEOVER_FORCE) {
+      printf("size > 0 gameover\n");
       if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
       return 1;

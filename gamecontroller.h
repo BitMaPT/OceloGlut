@@ -24,7 +24,7 @@ typedef enum GameState {
 }GameState;
 
 int ControlGameWithState();
-int SetSocket(char **argv);
+int SetSocket(int argc, char **argv);
 
 extern GameState gameState;
 extern OceloStoneColor myStoneColor;
