@@ -16,6 +16,7 @@
 #include"syncgame.h"
 #include"pngimage.h"
 #include"gameover.h"
+#include"gridline.h"
 
 int SetWaitOpponentSign();
 int RecvMyStoneColor();
@@ -153,6 +154,7 @@ int SetSocket(int argc, char **argv) {
 void InitGame() {
   
   int x, y;
+  int pos[] = {OCELO_MARGIN, OCELO_MARGIN};
 
   DeleteAllObject();
 
@@ -166,6 +168,8 @@ void InitGame() {
   oceloBoard[3][4] = InitOceloStone(4, 3, STONE_COLOR_WHITE);
   oceloBoard[4][3] = InitOceloStone(3, 4, STONE_COLOR_WHITE);
   oceloBoard[4][4] = InitOceloStone(4, 4, STONE_COLOR_BLACK);
+
+  InitGridLine(pos, 3, 5);
 
   return;
 }
