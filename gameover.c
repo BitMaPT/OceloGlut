@@ -80,8 +80,8 @@ int ResultStonePut() {
       oceloResult[0]--;
       mycount++;
 
-      x = WIDTH - (mycount % WIDTH);
-      y = HEIGHT - (mycount / WIDTH);
+      x = OCELO_WIDTH - ((mycount - 1) % OCELO_WIDTH) - 1;
+      y = OCELO_HEIGHT - ((mycount - 1) / OCELO_WIDTH) - 1;
       InitOceloStone(x, y, myStoneColor);
     }
 
@@ -91,8 +91,8 @@ int ResultStonePut() {
       oceloResult[1]--;
       opcount++;
 
-      x = opcount % WIDTH;
-      y = opcount / WIDTH;
+      x = (opcount - 1) % OCELO_WIDTH;
+      y = (opcount - 1) / OCELO_WIDTH;
       InitOceloStone(x, y, enemyStoneColor);
     }
   }
