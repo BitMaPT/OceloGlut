@@ -62,7 +62,7 @@ void init(int argc, char **argv) {
 }
 
 void closeWindow() {
-  close(clientSockfd);
+  //close(clientSockfd);
 }
 
 int main(int argc, char **argv) {

@@ -5,6 +5,7 @@
 #include<sys/types.h>
 #include<netinet/in.h>
 #include<sys/select.h>
+#include<errno.h>
 #include<unistd.h>
 #include"server.h"
 #include"syncgame.h"
@@ -48,6 +49,7 @@ void CloseConnection(PlayerTuple *pt);
 void ForceCloseConnection(PlayerTuple *pt, int sockfd);
 void DeletePlayerTupleList(PlayerTuple *pt);
 int DeleteInitPlayerTuple(PlayerTuple *pt, int sockfd);
+void CheckLostReadySocket();
 
 
 PlayerTupleList tupleHead = {NULL, NULL, NULL};
@@ -103,12 +105,19 @@ int main(int argc, char **argv) {
     list = tupleHead.next;
     while(list) {
       pt = list->pt;
-      FD_SET(pt->sockfds[0], &readfds);
-      FD_SET(pt->sockfds[1], &readfds);
-      maxfd = maxfd > pt->maxfd ? maxfd : pt->maxfd;
+      if(pt->status == SERVER_INIT) {
+        FD_SET(pt->sockfds[0], &readfds);
+        maxfd = maxfd > pt->sockfds[0] ? maxfd : pt->sockfds[0]; 
+      } else {
+        FD_SET(pt->sockfds[0], &readfds);
+        FD_SET(pt->sockfds[1], &readfds);
+        maxfd = maxfd > pt->maxfd ? maxfd : pt->maxfd;
+      } 
+      
       list = list->next;
     }
 
+    printf("select...\n");
     retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
 
     list = tupleHead.next;
@@ -129,6 +138,7 @@ int main(int argc, char **argv) {
 
     if(FD_ISSET(l_sockfd, &readfds)) {
       //accept new socket
+      CheckLostReadySocket();
       AcceptNewConnection(l_sockfd, &sa);
     }
 
@@ -163,6 +173,34 @@ int AcceptNewConnection(int l_sockfd, struct sockaddr_in *sa) {
   if(!CreatePlayerTuple(sockfd, buf)) return 0;
 
   return 1;
+}
+
+void CheckLostReadySocket() {
+  char buf[SYNC_BUF_SIZE];
+  PlayerTupleList *list, *before;
+
+  list = readyHead.next;
+  before = &readyHead;
+  while(list) {
+    ssize_t size;
+    size =recv(list->pt->sockfds[0], buf, SYNC_BUF_SIZE, MSG_DONTWAIT);
+    if(size <= 0) {
+      if(errno == EAGAIN || errno == EWOULDBLOCK) goto nextlist;
+
+      close(list->pt->sockfds[0]);
+      before->next = list->next;
+      if(list == readyTail) {
+        readyTail = list;
+      }
+      free(list->name);
+      free(list->pt);
+      free(list);
+    }
+
+    nextlist:;
+    before = list;
+    list = list->next;
+  }
 }
 
 int CreatePlayerTuple(int sockfd, char *name) {
