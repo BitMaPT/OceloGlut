@@ -51,6 +51,10 @@ void init(int argc, char **argv) {
   if(!LoadImage("Stunt.png")) exit(1);
 }
 
+void closeWindow() {
+  close(clientSockfd);
+}
+
 int main(int argc, char **argv) {
   if(argc < 3) {
     fprintf(stderr, "write host and port\n");
@@ -67,6 +71,7 @@ int main(int argc, char **argv) {
   glutMouseFunc(Mouse);
   glutIdleFunc(Idle);
   init(argc, argv);
+  atexit(closeWindow);
 
   glutMainLoop();
 
