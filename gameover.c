@@ -56,15 +56,12 @@ int ResultStonePut() {
   if(oceloResult[0] == 0 && oceloResult[1] == 0) {
     int nextStateShiftTime = 1000;
     if(nextStateShiftTime < glutGet(GLUT_ELAPSED_TIME) - startTime) {
-      int pos[] = {WIDTH / 2, HEIGHT / 2};
-      int size[] = {255, 255};
-
       if(mycount > opcount) {
-        if(InitImage("Stunt.png", pos, size, ImageAnimZoomIn) == NULL) return 0;
+        if(InitImage("img/win.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       } else if(mycount == opcount) {
-        if(InitImage("Stunt.png", pos, size, ImageAnimZoomIn) == NULL) return 0;
+        if(InitImage("img/draw.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       } else {
-        if(InitImage("Stunt.png", pos, size, ImageAnimZoomIn) == NULL) return 0;
+        if(InitImage("img/lose.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       }
       gameState = GAMESTATE_RESULT_SHOWRESULT;
     }

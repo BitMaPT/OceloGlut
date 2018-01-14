@@ -171,10 +171,8 @@ void InitGame() {
 }
 
 int SetWaitOpponentSign() {
-  int pos[] = {WIDTH / 2, HEIGHT / 2};
-  int size[] = {255, 255};
 
-  if(InitImage("Stunt.png", pos, size, ImageNoneAnim) == NULL) return 0;
+  if(InitImage("img/search.png", defaultPos, defaultSize, ImageNoneAnim) == NULL) return 0;
 
   gameState = GAMESTATE_WAIT_OPPONENT;
   return 1;
@@ -192,18 +190,18 @@ int RecvMyStoneColor() {
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
 
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/comerror.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
     } 
   } else if(size == 0) {
     //connection lost from server
     fprintf(stderr, "%s line:%d connection lost\n", __FILE__, __LINE__);
 
-    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    if(InitImage("img/serverlost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
     gameState = GAMESTATE_CONNECITON_LOST;
   } else {
     if(buf[0] == SYNC_GAMEOVER_FORCE) {
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/oplost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
       return 1;
     }
@@ -255,7 +253,7 @@ int SendSignalForSync() {
         fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
         perror("send");
 
-        if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+        if(InitImage("img/comerror.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
         gameState = GAMESTATE_CONNECITON_LOST;
       }
 
@@ -279,7 +277,7 @@ int GetPutablePosition() {
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
 
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/comerror.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
     }
 
@@ -287,7 +285,7 @@ int GetPutablePosition() {
   } else if(size == 0) {
     //connection lost from server
     fprintf(stderr, "%s line:%d connection lost from server\n", __FILE__, __LINE__);
-    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    if(InitImage("img/serverlost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
     gameState = GAMESTATE_CONNECITON_LOST;
     printf("size == 0\n");
     return 1;
@@ -297,7 +295,7 @@ int GetPutablePosition() {
     //connection lost from opponent
     if(buf[0] == SYNC_GAMEOVER_FORCE) {
       printf("size > 0 gameover\n");
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/oplost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
       return 1;
     }
@@ -310,17 +308,15 @@ int GetPutablePosition() {
 }
 
 int DetermineNextRoutine(char *buf) {
-  int pos[] = {WIDTH / 2, HEIGHT / 2};
-  int size[] = {225, 225};
 
   switch((SyncHeader)buf[0]) {
     case SYNC_PUTABLEPOS:
       if((OceloStoneColor)buf[1] == myStoneColor) {
         SetSelectablePutPoint(buf + 2);
-        InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
+        InitImage("img/myturn.png", defaultPos, defaultSize, ImageAnimByXaxis);
         gameState = GAMESTATE_WAIT_MYTURN_SIGN;
       } else {
-        InitImage("Stunt.png", pos, size, ImageAnimByXaxis);
+        InitImage("img/opturn.png", defaultPos, defaultSize, ImageAnimByXaxis);
         gameState = GAMESTATE_WAIT_OPTURN_SIGN;
       }
       return 1;
@@ -333,12 +329,10 @@ int DetermineNextRoutine(char *buf) {
 }
 
 int GameOver() {
-  int pos[] = {WIDTH / 2, HEIGHT / 2};
-  int size[] = {255, 255};
 
   close(clientSockfd);
 
-  if(InitImage("Stunt.png", pos, size, ImageAnimByYaxis) == NULL) {
+  if(InitImage("img/gameover.png", defaultPos, defaultSize, ImageAnimByYaxis) == NULL) {
     exit(1);
   }
 
@@ -374,7 +368,7 @@ int SendPutPosition(int x, int y) {
         fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
         perror("send");
 
-        if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+        if(InitImage("img/comerror.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
         gameState = GAMESTATE_CONNECITON_LOST;
       }
       return 1;
@@ -396,12 +390,12 @@ int RecvPutPosition() {
       //any error is occured in socket communication
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/comerror.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
     }
   } else if(size == 0) {
     //connection lost from server
-    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    if(InitImage("img/serverlost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
     gameState = GAMESTATE_CONNECITON_LOST;
   } else {
     int x, y;
@@ -411,7 +405,7 @@ int RecvPutPosition() {
 
     //connection lost from opponent
     if(buf[0] == (char)SYNC_GAMEOVER_FORCE) {
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/oplost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
       return 1;
     }
@@ -451,16 +445,16 @@ int RecvSignalForceGameover() {
       fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
       perror("recv");
 
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/comerror.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
     }
   } else if(size == 0) {
     fprintf(stderr, "%s line:%d connection lost from server\n", __FILE__, __LINE__);
-    if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+    if(InitImage("img/serverlost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
     gameState = GAMESTATE_CONNECITON_LOST;
   } else {
     if(buf[0] == SYNC_GAMEOVER_FORCE) {
-      if(InitImage("Stunt.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
+      if(InitImage("img/oplost.png", defaultPos, defaultSize, ImageAnimZoomIn) == NULL) return 0;
       gameState = GAMESTATE_CONNECITON_LOST;
     }
   }
