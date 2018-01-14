@@ -13,7 +13,8 @@
 
 typedef enum {
   SERVER_WAIT_PUT,
-  SERVER_WAIT_SYNC
+  SERVER_WAIT_SYNC,
+  SERVER_INIT
 }ServerStatus;
 
 typedef struct PlayerTuple PlayerTuple;
@@ -24,11 +25,18 @@ struct PlayerTuple {
   int oceloBoard[OCELO_HEIGHT][OCELO_WIDTH];
   OceloStoneColor putPlayer;
   ServerStatus status;
-  PlayerTuple *next;
+};
+
+typedef struct PlayerTupleList PlayerTupleList;
+struct PlayerTupleList {
+  PlayerTupleList *next;
+  PlayerTuple *pt;
+  char *name;
 };
 
 int AcceptNewConnection(int l_sockfd, struct sockaddr_in *sa);
-int CreatePlayerTuple(int sockfd);
+int CreatePlayerTuple(int sockfd, char *name);
+int SendGameStartSignal(PlayerTuple *pt);
 int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd);
 int CheckPutablePosition(PlayerTuple *pt);
 int SendPutablePosition(PlayerTuple *pt, int *pos);
@@ -38,10 +46,15 @@ int RelayPutPosition(PlayerTuple *pt, int sockfd);
 int RenewOceloBoard(PlayerTuple *pt, char *buf);
 void CloseConnection(PlayerTuple *pt);
 void ForceCloseConnection(PlayerTuple *pt, int sockfd);
+void DeletePlayerTupleList(PlayerTuple *pt);
+int DeleteInitPlayerTuple(PlayerTuple *pt, int sockfd);
 
 
-PlayerTuple tupleHead;
-PlayerTuple *tupleTail = &tupleHead;
+PlayerTupleList tupleHead = {NULL, NULL, NULL};
+PlayerTupleList *tupleTail = &tupleHead;
+
+PlayerTupleList readyHead = {NULL, NULL, NULL};
+PlayerTupleList *readyTail = &readyHead;
 
 #define SERVER_PORT 49152
 #define BACKLOG_NUM 10
@@ -80,48 +93,54 @@ int main(int argc, char **argv) {
   }
 
   while(1) {
-    PlayerTuple *tuple;
+    PlayerTupleList *list, *before;
+    PlayerTuple *pt;
     int retval, maxfd = l_sockfd;
     
     //initialize readfds for select
     FD_ZERO(&readfds);
     FD_SET(l_sockfd, &readfds);
-    tuple = tupleHead.next;
-    while(tuple) {
-      FD_SET(tuple->sockfds[0], &readfds);
-      FD_SET(tuple->sockfds[1], &readfds);
-      maxfd = maxfd > tuple->maxfd ? maxfd : tuple->maxfd;
-      tuple = tuple->next;
+    list = tupleHead.next;
+    while(list) {
+      pt = list->pt;
+      FD_SET(pt->sockfds[0], &readfds);
+      FD_SET(pt->sockfds[1], &readfds);
+      maxfd = maxfd > pt->maxfd ? maxfd : pt->maxfd;
+      list = list->next;
     }
 
     retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
+
+    list = tupleHead.next;
+    while(list) {
+      int i;
+      PlayerTuple *pt = list->pt;
+
+      for(i = 0; i < 2; i++) {
+        if(FD_ISSET(pt->sockfds[i], &readfds)) {
+          //some routine for socket
+          printf("ISSET %d\n", pt->sockfds[i]);
+          SwitchRoutineByTupleStatus(pt, pt->sockfds[i]);
+          goto loopend;
+        }
+      }
+      list = list->next;
+    }
+
     if(FD_ISSET(l_sockfd, &readfds)) {
       //accept new socket
       AcceptNewConnection(l_sockfd, &sa);
-      continue;
-    }
-    tuple = tupleHead.next;
-    while(tuple) {
-      int i;
-
-      for(i = 0; i < 2; i++) {
-        if(FD_ISSET(tuple->sockfds[i], &readfds)) {
-          //some routine for socket
-          SwitchRoutineByTupleStatus(tuple, tuple->sockfds[i]);
-          goto exitloop; 
-        }
-      }
- 
-      tuple = tuple->next;
     }
 
-    exitloop:;
+    loopend:;
   }
 }
 
 int AcceptNewConnection(int l_sockfd, struct sockaddr_in *sa) {
   int sockfd;
   socklen_t saSize = sizeof(struct sockaddr_in);
+  char buf[SYNC_BUF_SIZE];
+  ssize_t size;
 
   sockfd = accept(l_sockfd, (struct sockaddr*)sa, &saSize);
   if(sockfd < 0) {
@@ -130,61 +149,107 @@ int AcceptNewConnection(int l_sockfd, struct sockaddr_in *sa) {
     return 0;
   }
 
-  if(!CreatePlayerTuple(sockfd)) return 0;
+  size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
+  
+  if(size < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("recv");
+    return 0;
+  } else if(size == 0) {
+    fprintf(stderr, "%s line:%d connection lost from client\n", __FILE__, __LINE__);
+    return 0;
+  }
+
+  if(!CreatePlayerTuple(sockfd, buf)) return 0;
 
   return 1;
 }
 
-int CreatePlayerTuple(int sockfd) {
-  static PlayerTuple tuple;
-  static int isInit = 1;
-  PlayerTuple *pt;
+int CreatePlayerTuple(int sockfd, char *name) {
+  PlayerTupleList *newList, *list, *before;
+  PlayerTuple *tuple;
+  
+  //search room
+  list = readyHead.next;
+  before = &readyHead;
+  while(list) {
+    if(strcmp(list->name, name) == 0) {
+      PlayerTuple *pt = list->pt;
 
-  if(isInit) {
-    tuple.sockfds[0] = sockfd;
-    isInit = 0;
-  } else {
-    tuple.sockfds[1] = sockfd;
-    tuple.status = SERVER_WAIT_SYNC;
-    tuple.next = NULL;
-    tuple.putPlayer = STONE_COLOR_BLACK;
-    Initboard(tuple.oceloBoard);
-    tuple.maxfd = (tuple.sockfds[0] > tuple.sockfds[1]) ? tuple.sockfds[0] : tuple.sockfds[1];
-    memset(tuple.syncflag, 0, sizeof(int) * 2);
+      before->next = list->next;
+      if(list == readyTail) {
+        readyTail = before;
+      }
 
-    isInit = 1;
+      pt->sockfds[1] = sockfd;
+      pt->maxfd = pt->sockfds[0] > pt->sockfds[1] ? pt->sockfds[0] : pt->sockfds[1];
+      memset(pt->syncflag, 0, sizeof(pt->syncflag));
+      pt->status = SERVER_WAIT_SYNC;
+      Initboard(pt->oceloBoard);
+      SendGameStartSignal(list->pt);
 
-    pt = (PlayerTuple*)malloc(sizeof(PlayerTuple));
-    if(pt == NULL) {
-      //TODO close two connection
-      ForceCloseConnection(&tuple, 0);
-      fprintf(stderr, "%s line:%d malloc error", __FILE__, __LINE__);
-      return 0;
+      return 1;
     }
+    before = list;
+    list = list->next;
+  }
 
-    memcpy(pt, &tuple, sizeof(PlayerTuple));
+  //create new room
+  newList = (PlayerTupleList*)malloc(sizeof(PlayerTupleList));
+  if(newList == NULL) {
+    fprintf(stderr, "%s line:%d malloc error\n", __FILE__, __LINE__);
+    return 0;
+  }
+  tuple = (PlayerTuple*)malloc(sizeof(PlayerTuple));
+  if(tuple == NULL) {
+    fprintf(stderr, "%s line:%d malloc error\n", __FILE__, __LINE__);
+    return 0;
+  }
+  newList->name = (char*)malloc(sizeof(char) * (strlen(name) + 1));
+  if(newList->name == NULL) {
+    fprintf(stderr, "%s line:%d malloc error\n", __FILE__, __LINE__);
+    return 0;
+  }
+
+  memset(tuple, 0, sizeof(PlayerTuple));
+  tuple->status = SERVER_INIT;
+  tuple->putPlayer = STONE_COLOR_BLACK;
+  tuple->sockfds[0] = sockfd;
+
+  strcpy(newList->name, name);
+  newList->next = NULL;
+  newList->pt = tuple;
+
+  readyTail->next = newList;
+  readyTail = newList;
+
+  tupleTail->next = newList;
+  tupleTail = newList;
+
+  return 1;
+}
+
+int SendGameStartSignal(PlayerTuple *pt) {
+  char buf[SYNC_BUF_SIZE];
+
+  memset(buf, 0, sizeof(buf));
+  buf[0] = (char)SYNC_GAMESTART;
+  buf[1] = (char)STONE_COLOR_BLACK;
+  if(send(pt->sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("send");
     
-    tupleTail->next = pt;
-    tupleTail = pt;
+    ForceCloseConnection(pt, pt->sockfds[0]);
+    return 1;
+  }
 
-    //determine and send player stone colors to players
-    {
-      char buf[SYNC_BUF_SIZE];
-      buf[0] = (char)SYNC_GAMESTART;//gamestart header
-      buf[1] = (char)STONE_COLOR_BLACK;
-      if(send(pt->sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
-        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-        perror("send");
-        return 0;
-      }
+  buf[1] = (char)STONE_COLOR_WHITE;
+  if(send(pt->sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("send");
 
-      buf[1] = (char)STONE_COLOR_WHITE;
-      if(send(pt->sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0) {
-        fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
-        perror("send");
-        return 0;
-      }
-    }
+    ForceCloseConnection(pt, pt->sockfds[1]);
+    return 1;
   }
 
   return 1;
@@ -196,9 +261,40 @@ int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd) {
       return RelayPutPosition(pt, sockfd);
     case SERVER_WAIT_SYNC:
       return RecvSyncSignal(pt, sockfd);
+    case SERVER_INIT:
+      return DeleteInitPlayerTuple(pt, sockfd);
   }
 
   return 0;
+}
+
+//if a connection of waiting opponent player's client is closed,
+//this routine will be called
+int DeleteInitPlayerTuple(PlayerTuple *pt, int sockfd) {
+  ssize_t size;
+  char buf[SYNC_BUF_SIZE];
+
+  size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
+  if(size <= 0) {
+    PlayerTupleList *list, *before;
+
+    list = readyHead.next;
+    before = &readyHead;
+    while(list) {
+      if(list->pt == pt) {
+        before->next = list->next;
+        if(readyTail == list) {
+          readyTail = before;
+        }
+        break;
+      }
+    }
+    DeletePlayerTupleList(pt);
+  } else {
+    fprintf(stderr, "something bug is contained in client\n");
+  }
+
+  return 1;
 }
 
 //CheckPutablePosition.
@@ -208,7 +304,6 @@ int CheckPutablePosition(PlayerTuple *pt) {
   int pos[OCELO_HEIGHT * OCELO_WIDTH];
 
   if(CheckPutablePoints(pt->oceloBoard, pos, pt->putPlayer)) {
-    printf("putable 1\n");
     return SendPutablePosition(pt, pos);
   } else {
     switch(pt->putPlayer) {
@@ -221,11 +316,9 @@ int CheckPutablePosition(PlayerTuple *pt) {
     }
 
     if(CheckPutablePoints(pt->oceloBoard, pos, pt->putPlayer)) {
-      printf("putable 2\n");
       return SendPutablePosition(pt, pos);
     } else {
       //send gameover signal
-      printf("gameover\n");
       return SendGameoverSignal(pt);
     }
   }
@@ -267,6 +360,7 @@ int SendGameoverSignal(PlayerTuple *pt) {
   int i;
   char buf[SYNC_BUF_SIZE];
   
+  memset(buf, 0, sizeof(buf));
   buf[0] = (char)SYNC_GAMEOVER;//header of gameover
   for(i = 0; i < 2; i++) {
     if(send(pt->sockfds[i], buf, SYNC_BUF_SIZE, 0) < 0) {
@@ -371,54 +465,69 @@ int RenewOceloBoard(PlayerTuple *pt, char *buf) {
 }
 
 void CloseConnection(PlayerTuple *pt) {
-  PlayerTuple *t, *before;
+  PlayerTupleList *list, *before;
 
   close(pt->sockfds[0]);
   close(pt->sockfds[1]);
 
-  t = tupleHead.next;
+  list = tupleHead.next;
   before = &tupleHead;
 
   //find pt from PlayerTuple list
-  while(t) {
-    if(t == pt) {
-      before->next = t->next;
-      if(t == tupleTail) {
-        tupleTail = before;
-      }
-      free(pt);
-      break;
-    }
-    before = t;
-    t = t->next;
-  }
+  DeletePlayerTupleList(pt);
 }
 
 void ForceCloseConnection(PlayerTuple *pt, int sockfd) {
   char buf[SYNC_BUF_SIZE];
-  PlayerTuple *t, *before;
+  PlayerTupleList *list, *before;
+
+  memset(buf, 0, sizeof(buf));
 
   buf[0] = SYNC_GAMEOVER_FORCE;
-  if(sockfd == pt->sockfds[0]) send(pt->sockfds[1], buf, SYNC_BUF_SIZE, 0);
-  if(sockfd == pt->sockfds[1]) send(pt->sockfds[0], buf, SYNC_BUF_SIZE, 0);
+  if(sockfd == pt->sockfds[0]) {
+    printf("send1\n");
+    if(send(pt->sockfds[1], buf, SYNC_BUF_SIZE, 0) < 0){
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("send");
+    }
+  }
+  if(sockfd == pt->sockfds[1]) {
+    printf("send2\n");
+    if(send(pt->sockfds[0], buf, SYNC_BUF_SIZE, 0) < 0) {
+      fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+      perror("send");
+    }
+  }
 
-  close(pt->sockfds[0]);
-  close(pt->sockfds[1]);
-
-  t = tupleHead.next;
-  before = &tupleHead;
+  shutdown(pt->sockfds[0], SHUT_WR);
+  shutdown(pt->sockfds[1], SHUT_WR);
+  // close(pt->sockfds[0]);
+  // close(pt->sockfds[1]);
 
   //find pt from PlayerTuple list
-  while(t) {
-    if(t == pt) {
-      before->next = t->next;
-      if(t == tupleTail) {
+  DeletePlayerTupleList(pt);
+}
+
+void DeletePlayerTupleList(PlayerTuple *pt) {
+  PlayerTupleList *list, *before;
+
+  list = tupleHead.next;
+  before = &tupleHead;
+  while(list) {
+    if(list->pt == pt) {
+      before->next = list->next;
+      if(list == tupleTail) {
         tupleTail = before;
       }
-      free(pt);
-      break;
+
+      free(list->pt);
+      free(list->name);
+      free(list);
+
+      return;
     }
-    before = t;
-    t = t->next;
+
+    before = list;
+    list = list->next;
   }
 }
