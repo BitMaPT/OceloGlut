@@ -5,12 +5,14 @@
 #include"putpoint.h"
 #include"bitstring.h"
 #include"pngimage.h"
+#include"gridline.h"
 
 typedef enum ObjectType {
   OBJECT_OCELO_STONE,
   OBJECT_SELECTABLE_POINT,
   OBJECT_BITSTRING,
-  OBJECT_PNGIMAGE
+  OBJECT_PNGIMAGE,
+  OBJECT_GRIDLINE
 }ObjectType;
 
 typedef union ObjectBody {
@@ -18,6 +20,7 @@ typedef union ObjectBody {
   OceloPoint *point;
   BitString *string;
   Image *image;
+  GridLine *grid;
 }ObjectBody;
 
 typedef struct Object Object;
