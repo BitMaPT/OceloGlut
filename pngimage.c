@@ -59,6 +59,8 @@ int GetImage(char *filename, int *id, pngInfo *info) {
       *info = list->info;
       return 1;
     }
+
+    list = list->next;
   }
 
   return 0;

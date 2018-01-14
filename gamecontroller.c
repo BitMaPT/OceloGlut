@@ -171,9 +171,7 @@ void InitGame() {
 }
 
 int SetWaitOpponentSign() {
-
   if(InitImage("img/search.png", defaultPos, defaultSize, ImageNoneAnim) == NULL) return 0;
-
   gameState = GAMESTATE_WAIT_OPPONENT;
   return 1;
 }
