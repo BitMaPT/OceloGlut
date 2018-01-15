@@ -34,10 +34,10 @@ struct Object {
 
 typedef struct ObjectList ObjectList;
 
-typedef struct ObjectList {
+struct ObjectList {
   Object *obj;
   ObjectList *next;
-}ObjectList;
+};
 
 int DrawAllObject();
 int UpdateAllObject();
