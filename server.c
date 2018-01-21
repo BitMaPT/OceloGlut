@@ -5,6 +5,8 @@
 #include<sys/types.h>
 #include<netinet/in.h>
 #include<sys/select.h>
+#include<sys/wait.h>
+#include<signal.h>
 #include<errno.h>
 #include<unistd.h>
 #include"server.h"
@@ -51,6 +53,9 @@ void CheckLostReadySocket();
 int ForkProcessToStartGame(PlayerTuple *pt);
 void StartGame(PlayerTuple *pt);
 
+int SetUpSignalChild();
+void CatchSignalChild(int signo);
+
 
 //PlayerTupleList tupleHead = {NULL, NULL, NULL};
 //PlayerTupleList *tupleTail = &tupleHead;
@@ -68,6 +73,8 @@ int main(int argc, char **argv) {
   struct sockaddr_in sa;
   fd_set readfds;
   char buf[SYNC_BUF_SIZE];
+
+  if(!SetUpSignalChild()) return 1;
 
   sa.sin_family = AF_INET;
   sa.sin_port = htons(SERVER_PORT);
@@ -561,4 +568,29 @@ void ForceCloseConnection(PlayerTuple *pt, int sockfd) {
   free(pt);
 
   exit(2);
+}
+
+int SetUpSignalChild() {
+  struct sigaction act;
+
+  memset(&act, 0, sizeof(struct sigaction));
+  act.sa_handler = CatchSignalChild;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+  if(sigaction(SIGCHLD, &act, NULL) < 0) {
+    fprintf(stderr, "%s line:%d ", __FILE__, __LINE__);
+    perror("sigaction");
+    return 0;
+  }
+
+  return 1;
+}
+
+void CatchSignalChild(int signo) {
+  pid_t c_pid = 0;
+  
+  do {
+    int status;
+    c_pid = waitpid(-1, &status, WNOHANG);
+  } while(c_pid > 0);
 }
