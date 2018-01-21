@@ -211,10 +211,12 @@ int RecvMyStoneColor() {
     //receive data from server
     switch((OceloStoneColor)buf[1]) {
       case STONE_COLOR_BLACK:
+        printf("my color black\n");
         myStoneColor = STONE_COLOR_BLACK;
         enemyStoneColor = STONE_COLOR_WHITE;
         break;
       case STONE_COLOR_WHITE:
+        printf("my color white\n");
         myStoneColor = STONE_COLOR_WHITE;
         enemyStoneColor = STONE_COLOR_BLACK;
         break;

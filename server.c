@@ -14,8 +14,7 @@
 
 typedef enum {
   SERVER_WAIT_PUT,
-  SERVER_WAIT_SYNC,
-  SERVER_INIT
+  SERVER_WAIT_SYNC
 }ServerStatus;
 
 typedef struct PlayerTuple PlayerTuple;
@@ -47,16 +46,19 @@ int RelayPutPosition(PlayerTuple *pt, int sockfd);
 int RenewOceloBoard(PlayerTuple *pt, char *buf);
 void CloseConnection(PlayerTuple *pt);
 void ForceCloseConnection(PlayerTuple *pt, int sockfd);
-void DeletePlayerTupleList(PlayerTuple *pt);
-int DeleteInitPlayerTuple(PlayerTuple *pt, int sockfd);
 void CheckLostReadySocket();
 
+int ForkProcessToStartGame(PlayerTuple *pt);
+void StartGame(PlayerTuple *pt);
 
-PlayerTupleList tupleHead = {NULL, NULL, NULL};
-PlayerTupleList *tupleTail = &tupleHead;
+
+//PlayerTupleList tupleHead = {NULL, NULL, NULL};
+//PlayerTupleList *tupleTail = &tupleHead;
 
 PlayerTupleList readyHead = {NULL, NULL, NULL};
 PlayerTupleList *readyTail = &readyHead;
+
+PlayerTuple *readyTuple = NULL;
 
 #define SERVER_PORT 49152
 #define BACKLOG_NUM 10
@@ -97,22 +99,19 @@ int main(int argc, char **argv) {
   while(1) {
     PlayerTupleList *list, *before;
     PlayerTuple *pt;
-    int retval, maxfd = l_sockfd;
+    int retval, maxfd;
     
     //initialize readfds for select
     FD_ZERO(&readfds);
     FD_SET(l_sockfd, &readfds);
-    list = tupleHead.next;
+    maxfd = l_sockfd;
+    
+    list = readyHead.next;
     while(list) {
       pt = list->pt;
-      if(pt->status == SERVER_INIT) {
-        FD_SET(pt->sockfds[0], &readfds);
-        maxfd = maxfd > pt->sockfds[0] ? maxfd : pt->sockfds[0]; 
-      } else {
-        FD_SET(pt->sockfds[0], &readfds);
-        FD_SET(pt->sockfds[1], &readfds);
-        maxfd = maxfd > pt->maxfd ? maxfd : pt->maxfd;
-      } 
+
+      FD_SET(pt->sockfds[0], &readfds);
+      maxfd = maxfd > pt->sockfds[0] ? maxfd : pt->sockfds[0];
       
       list = list->next;
     }
@@ -120,25 +119,11 @@ int main(int argc, char **argv) {
     printf("select...\n");
     retval = select(maxfd + 1, &readfds, NULL, NULL, NULL);
 
-    list = tupleHead.next;
-    while(list) {
-      int i;
-      PlayerTuple *pt = list->pt;
+    list = readyHead.next;
 
-      for(i = 0; i < 2; i++) {
-        if(FD_ISSET(pt->sockfds[i], &readfds)) {
-          //some routine for socket
-          printf("ISSET %d\n", pt->sockfds[i]);
-          SwitchRoutineByTupleStatus(pt, pt->sockfds[i]);
-          goto loopend;
-        }
-      }
-      list = list->next;
-    }
-
+    CheckLostReadySocket();
     if(FD_ISSET(l_sockfd, &readfds)) {
       //accept new socket
-      CheckLostReadySocket();
       AcceptNewConnection(l_sockfd, &sa);
     }
 
@@ -183,18 +168,35 @@ void CheckLostReadySocket() {
   before = &readyHead;
   while(list) {
     ssize_t size;
-    size =recv(list->pt->sockfds[0], buf, SYNC_BUF_SIZE, MSG_DONTWAIT);
-    if(size <= 0) {
+    size =recv(list->pt->sockfds[0], buf, SYNC_BUF_SIZE, MSG_DONTWAIT | MSG_PEEK);
+    if(size < 0) {
       if(errno == EAGAIN || errno == EWOULDBLOCK) goto nextlist;
 
+      //close socket
       close(list->pt->sockfds[0]);
       before->next = list->next;
       if(list == readyTail) {
-        readyTail = list;
+        readyTail = before;
       }
+      printf("delete list size < 0\n");
       free(list->name);
       free(list->pt);
       free(list);
+
+      list = before;
+    } else if(size == 0) {
+      //close socket
+      close(list->pt->sockfds[0]);
+      before->next = list->next;
+      if(list == readyTail) {
+        readyTail = before;
+      }
+      printf("delete list size == 0\n");
+      free(list->name);
+      free(list->pt);
+      free(list);
+
+      list = before;
     }
 
     nextlist:;
@@ -211,6 +213,7 @@ int CreatePlayerTuple(int sockfd, char *name) {
   list = readyHead.next;
   before = &readyHead;
   while(list) {
+    //if room name is same, 
     if(strcmp(list->name, name) == 0) {
       PlayerTuple *pt = list->pt;
 
@@ -224,9 +227,8 @@ int CreatePlayerTuple(int sockfd, char *name) {
       memset(pt->syncflag, 0, sizeof(pt->syncflag));
       pt->status = SERVER_WAIT_SYNC;
       Initboard(pt->oceloBoard);
-      SendGameStartSignal(list->pt);
 
-      return 1;
+      return ForkProcessToStartGame(pt);
     }
     before = list;
     list = list->next;
@@ -250,7 +252,6 @@ int CreatePlayerTuple(int sockfd, char *name) {
   }
 
   memset(tuple, 0, sizeof(PlayerTuple));
-  tuple->status = SERVER_INIT;
   tuple->putPlayer = STONE_COLOR_BLACK;
   tuple->sockfds[0] = sockfd;
 
@@ -261,10 +262,60 @@ int CreatePlayerTuple(int sockfd, char *name) {
   readyTail->next = newList;
   readyTail = newList;
 
-  tupleTail->next = newList;
-  tupleTail = newList;
+  return 1;
+}
+
+int ForkProcessToStartGame(PlayerTuple *pt) {
+  int ret, pid;
+  pid_t p_pid;
+
+  p_pid = getpid();
+
+  ret = fork();
+  if(ret == -1) {
+    perror("fork");
+    return 0;
+  }
+
+  pid = getpid();
+  if(pid != p_pid) {
+    StartGame(pt);
+  }
 
   return 1;
+}
+
+void StartGame(PlayerTuple *pt) {
+  fd_set readfds;
+  int i;
+  char buf[SYNC_BUF_SIZE];
+  ssize_t size;
+
+  if(!SendGameStartSignal(pt)) {
+    exit(EXIT_FAILURE);
+  }
+
+  while(1) {
+    FD_ZERO(&readfds);
+    printf("state: %d\n", pt->status);
+    FD_SET(pt->sockfds[1], &readfds);
+    FD_SET(pt->sockfds[0], &readfds);
+    printf("%d, %d, %d\n", pt->sockfds[0], pt->sockfds[1], pt->maxfd);
+
+    select(pt->maxfd + 1, &readfds, NULL, NULL, NULL);
+
+    for(i = 0; i < 2; i++) {
+      printf("%d\n", i);
+      if(FD_ISSET(pt->sockfds[i], &readfds)) {
+        printf("socket %d\n", pt->sockfds[i]);
+        if(!SwitchRoutineByTupleStatus(pt, pt->sockfds[i])) {
+          exit(EXIT_FAILURE);
+        }
+      }
+    }
+  }
+
+  exit(EXIT_FAILURE);
 }
 
 int SendGameStartSignal(PlayerTuple *pt) {
@@ -299,40 +350,9 @@ int SwitchRoutineByTupleStatus(PlayerTuple *pt, int sockfd) {
       return RelayPutPosition(pt, sockfd);
     case SERVER_WAIT_SYNC:
       return RecvSyncSignal(pt, sockfd);
-    case SERVER_INIT:
-      return DeleteInitPlayerTuple(pt, sockfd);
   }
 
   return 0;
-}
-
-//if a connection of waiting opponent player's client is closed,
-//this routine will be called
-int DeleteInitPlayerTuple(PlayerTuple *pt, int sockfd) {
-  ssize_t size;
-  char buf[SYNC_BUF_SIZE];
-
-  size = recv(sockfd, buf, SYNC_BUF_SIZE, 0);
-  if(size <= 0) {
-    PlayerTupleList *list, *before;
-
-    list = readyHead.next;
-    before = &readyHead;
-    while(list) {
-      if(list->pt == pt) {
-        before->next = list->next;
-        if(readyTail == list) {
-          readyTail = before;
-        }
-        break;
-      }
-    }
-    DeletePlayerTupleList(pt);
-  } else {
-    fprintf(stderr, "something bug is contained in client\n");
-  }
-
-  return 1;
 }
 
 //CheckPutablePosition.
@@ -410,7 +430,7 @@ int SendGameoverSignal(PlayerTuple *pt) {
 
   CloseConnection(pt);
 
-  return 1;
+  exit(EXIT_SUCCESS);
 }
 
 //recieve signals of two players
@@ -436,10 +456,13 @@ int RecvSyncSignal(PlayerTuple *pt, int sockfd) {
     pt->syncflag[1] = 1;
   }
 
+  printf("recvsync %d\n", sockfd);
+
   if(pt->syncflag[0] && pt->syncflag[1]) {
     //check putable position
     pt->syncflag[0] = 0;
     pt->syncflag[1] = 0;
+    printf("check putalbe\n");
     return CheckPutablePosition(pt);
   }
 
@@ -503,21 +526,16 @@ int RenewOceloBoard(PlayerTuple *pt, char *buf) {
 }
 
 void CloseConnection(PlayerTuple *pt) {
-  PlayerTupleList *list, *before;
-
   close(pt->sockfds[0]);
   close(pt->sockfds[1]);
 
-  list = tupleHead.next;
-  before = &tupleHead;
+  free(pt);
 
-  //find pt from PlayerTuple list
-  DeletePlayerTupleList(pt);
+  exit(EXIT_SUCCESS);
 }
 
 void ForceCloseConnection(PlayerTuple *pt, int sockfd) {
   char buf[SYNC_BUF_SIZE];
-  PlayerTupleList *list, *before;
 
   memset(buf, 0, sizeof(buf));
 
@@ -537,35 +555,10 @@ void ForceCloseConnection(PlayerTuple *pt, int sockfd) {
     }
   }
 
-  // shutdown(pt->sockfds[0], SHUT_WR);
-  // shutdown(pt->sockfds[1], SHUT_WR);
   close(pt->sockfds[0]);
   close(pt->sockfds[1]);
 
-  //find pt from PlayerTuple list
-  DeletePlayerTupleList(pt);
-}
+  free(pt);
 
-void DeletePlayerTupleList(PlayerTuple *pt) {
-  PlayerTupleList *list, *before;
-
-  list = tupleHead.next;
-  before = &tupleHead;
-  while(list) {
-    if(list->pt == pt) {
-      before->next = list->next;
-      if(list == tupleTail) {
-        tupleTail = before;
-      }
-
-      free(list->pt);
-      free(list->name);
-      free(list);
-
-      return;
-    }
-
-    before = list;
-    list = list->next;
-  }
+  exit(2);
 }
